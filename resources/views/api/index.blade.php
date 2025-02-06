@@ -211,7 +211,7 @@
                             <button type="submit" class="btn btn-sm btn-danger me-2">Hapus</button>
                         </form> -->
                         <a href="{{ route('api.mapping', $api->id) }}" class="btn btn-sm btn-warning">mapping</a>
-                        <a href="" class="btn btn-sm btn-success">Kirim</a>
+                        <a href="{{ route('api.konfirm', $api->id) }}" class="btn btn-sm btn-success">Kirim</a>
                     </div>
                 </td>
             </tr>

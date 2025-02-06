@@ -9,9 +9,15 @@ class ApiResponse extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['api_id', 'response_data'];
+    protected $fillable = ['api_id', 'response_data', 'version_timestamp', 'is_latest'];
 
     protected $casts = [
-        'response_data' => 'array', // Agar JSON otomatis diconvert ke array
+        'response_data' => 'array', // JSON otomatis dikonversi ke array
     ];
+
+    // Scope untuk mengambil data terbaru
+    public function scopeLatestVersion($query)
+    {
+        return $query->where('is_latest', true);
+    }
 }

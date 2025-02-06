@@ -29,135 +29,173 @@ class ApiController extends Controller
     }
 
     public function sendRequest(Request $request, $apiId)
-    {
-        // Ambil data API dari database berdasarkan $apiId
-        $api = Api::findOrFail($apiId);
+{
+    // Ambil data API dari database
+    $api = Api::findOrFail($apiId);
 
-        // Cek apakah data API dengan api_id yang sama sudah ada di ApiResponse
-        $existingApiResponse = ApiResponse::where('api_id', $apiId)->first();
+    // Ambil parameter dari request
+    $parameter = $request->input('parameter');
+    parse_str($parameter, $params);
+    $tahun = $params['tahun'] ?? null; // Cek apakah ada parameter tahun
+
+    // Ambil URL API, method, dan credential key
+    $urlApi = trim($api->url_api);
+    $method = strtoupper($api->method);
+    $credentialKey = $api->credential_key;
+
+    // Konfigurasi request API
+    $options = [
+        'headers' => [
+            'Accept' => 'application/json',
+        ],
+    ];
+
+    if (!empty($credentialKey)) {
+        $options['headers']['Authorization'] = 'Bearer ' . $credentialKey;
+    }
+
+    if (!empty($params)) {
+        if ($method == 'GET') {
+            $urlApi .= (strpos($urlApi, '?') === false ? '?' : '&') . http_build_query($params);
+        } else {
+            $options['form_params'] = $params;
+        }
+    }
+
+    // Inisialisasi Guzzle Client
+    $client = new Client();
+
+    try {
+        // Kirim request ke API
+        $response = $client->request($method, $urlApi, $options);
+        $responseData = json_decode($response->getBody(), true);
+
+        // Cek apakah ada data lama dengan api_id yang sama
+        $existingApiResponse = ApiResponse::where('api_id', $apiId);
+
+        if ($tahun) {
+            $existingApiResponse = $existingApiResponse->whereJsonContains('response_data->tahun', (string) $tahun);
+        }
+
+        $existingApiResponse = $existingApiResponse->latest('version_timestamp')->first();
 
         if ($existingApiResponse) {
-            // Jika sudah ada, kirim notifikasi bahwa data API ini sudah ada
-            return response()->json([
-                'success' => false,
-                'message' => 'Data API ini sudah ada.',
-            ], 400);  // Status code 400 untuk kesalahan permintaan
+            // Tandai data lama sebagai bukan versi terbaru
+            $existingApiResponse->update(['is_latest' => false]);
         }
 
-        // Ambil parameter tambahan dari request form
-        $parameter = $request->input('parameter');
-        parse_str($parameter, $params);
+        // Simpan data baru sebagai versi terbaru
+        $newApiResponse = ApiResponse::create([
+            'api_id' => $apiId,
+            'response_data' => $responseData,
+            'version_timestamp' => now(),
+            'is_latest' => true,
+        ]);
 
-        // Ambil URL API, method, dan credential key dari database
-        $urlApi = trim($api->url_api); // Pastikan tidak ada spasi di URL
-        $method = strtoupper($api->method); // GET atau POST
-        $credentialKey = $api->credential_key;
+        return response()->json([
+            'success' => true,
+            'message' => 'Data versi terbaru telah disimpan.',
+            'response_data' => $responseData,
+        ]);
 
-        // Siapkan opsi untuk header dan parameter
-        $options = [
-            'headers' => [
-                'Accept' => 'application/json',
-            ],
-        ];
+    } catch (RequestException $e) {
+        $statusCode = $e->getResponse() ? $e->getResponse()->getStatusCode() : 'Tidak ada status code';
+        $errorResponse = $e->hasResponse() ? $e->getResponse()->getBody()->getContents() : 'Tidak ada response dari server';
 
-        // Jika ada credential key, tambahkan header Authorization
-        if (!empty($credentialKey)) {
-            $options['headers']['Authorization'] = 'Bearer ' . $credentialKey;
-        }
-
-        // Jika ada parameter, tambahkan ke URL atau body form
-        if (!empty($params)) {
-            if ($method == 'GET') {
-                // Untuk GET, tambahkan parameter ke URL
-                $urlApi .= (strpos($urlApi, '?') === false ? '?' : '&') . http_build_query($params);
-            } else {
-                // Untuk POST atau lainnya, tambahkan parameter ke body
-                $options['form_params'] = $params;
-            }
-        }
-
-        // Inisialisasi client Guzzle
-        $client = new Client();
-
-        try {
-            // Kirim request ke API
-            $response = $client->request($method, $urlApi, $options);
-
-            // Ambil response data dan simpan ke database
-            $responseData = json_decode($response->getBody(), true);
-
-            // Simpan ke tabel ApiResponse
-            $apiResponse = ApiResponse::create([
-                'api_id' => $apiId,
-                'response_data' => $responseData,
-            ]);
-
-            // Kembalikan response JSON dengan status sukses dan data
-            return response()->json([
-                'success' => true,
-                'message' => 'Data berhasil disimpan.',
-                'response_data' => $responseData,
-            ]);
-
-        } catch (RequestException $e) {
-            // Jika terjadi error, ambil status code dan response
-            $statusCode = $e->getResponse() ? $e->getResponse()->getStatusCode() : 'Tidak ada status code';
-            $errorResponse = $e->hasResponse() ? $e->getResponse()->getBody()->getContents() : 'Tidak ada response dari server';
-
-            // Cek jenis error dan kembalikan pesan yang sesuai
-            return response()->json([
-                'error' => 'Gagal menghubungi API',
-                'message' => $e->getMessage(),
-                'status_code' => $statusCode,
-                'server_response' => $errorResponse
-            ], 500);
-        }
+        return response()->json([
+            'error' => 'Gagal menghubungi API',
+            'message' => $e->getMessage(),
+            'status_code' => $statusCode,
+            'server_response' => $errorResponse
+        ], 500);
     }
+}
 
     
-    public function showMappingForm($apiId)
-    {
-        // Ambil data API berdasarkan id
-        $api = Api::find($apiId);
+   public function showMappingForm($apiId)
+{
+    // Ambil data API berdasarkan id
+    $api = Api::find($apiId);
 
-        if (!$api) {
-            return redirect()->back()->with('error', 'API not found');
-        }
-
-        // Ambil respon data dari ApiResponse berdasarkan api_id
-        $apiResponse = ApiResponse::where('api_id', $apiId)->first();
-
-        if (!$apiResponse) {
-            return redirect()->back()->with('error', 'API response not found');
-        }
-
-        // Ambil semua data mapping yang sudah ada
-        $dataMappings = DataMapping::where('api_id', $apiId)->get();
-
-        // Cek apakah response_data sudah dalam bentuk array atau masih string JSON
-        $responseData = $apiResponse->response_data;
-
-        if (is_string($responseData)) {
-            $decodedData = json_decode($responseData, true);
-        } elseif (is_array($responseData)) {
-            $decodedData = $responseData;
-        } else {
-            return redirect()->back()->with('error', 'Invalid response data format');
-        }
-
-        // Jika decoding gagal atau tidak ada data yang bisa digunakan
-        if (empty($decodedData)) {
-            return redirect()->back()->with('error', 'No source fields found');
-        }
-
-        // Data untuk kolom 'source' berasal dari respon API
-        $sourceFields = collect($decodedData);
-
-        // Data target, bisa kosong dulu atau diambil dari mapping yang ada
-        $targetFields = $dataMappings->pluck('target_field')->toArray();
-
-        return view('api.mapping', compact('api', 'sourceFields', 'targetFields', 'dataMappings'));
+    if (!$api) {
+        return redirect()->back()->with('error', 'API not found');
     }
+
+    // Ambil respon data dari ApiResponse berdasarkan api_id
+    $apiResponse = ApiResponse::where('api_id', $apiId)->latestVersion()->first();
+
+    if (!$apiResponse) {
+        return redirect()->back()->with('error', 'API response not found');
+    }
+
+    // Ambil semua data mapping yang sudah ada
+    $dataMappings = DataMapping::where('api_id', $apiId)->get();
+
+    // Ambil response data
+    $responseData = $apiResponse->response_data;
+
+    // Memeriksa apakah data sudah berupa JSON string dan decode jika perlu
+    if (is_string($responseData)) {
+        $decodedData = json_decode($responseData, true);
+
+        // Cek jika decoding JSON gagal
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return redirect()->back()->with('error', 'Invalid JSON format in Source Fields');
+        }
+    } elseif (is_array($responseData)) {
+        // Jika sudah dalam format array, langsung diproses
+        $decodedData = $responseData;
+    } else {
+        return redirect()->back()->with('error', 'Invalid response data format');
+    }
+
+    // Fungsi untuk menelusuri data respons secara rekursif
+    $dynamicFields = $this->findArrayKeys($decodedData);
+
+    if (empty($dynamicFields)) {
+        return redirect()->back()->with('error', 'No dynamic fields found in the API response');
+    }
+
+    // Data untuk kolom 'source' berasal dari dynamic fields yang ditemukan
+    $sourceFields = collect($dynamicFields);
+
+    // Data target, bisa kosong dulu atau diambil dari mapping yang ada
+    $targetFields = $dataMappings->pluck('target_field')->toArray();
+
+    return view('api.mapping', compact('api', 'sourceFields', 'targetFields', 'dataMappings'));
+}
+
+/**
+ * Fungsi rekursif untuk menelusuri array atau objek dan mencari kunci yang berisi array.
+ */
+private function findArrayKeys($data)
+{
+    $result = [];
+
+    // Jika data adalah array
+    if (is_array($data)) {
+        foreach ($data as $key => $value) {
+            // Jika value adalah array, simpan kunci dan data tersebut
+            if (is_array($value)) {
+                $result[$key] = $value;
+            }
+
+            // Jika value adalah objek atau array dalam objek, lakukan rekursi
+            if (is_array($value) || is_object($value)) {
+                $result = array_merge($result, $this->findArrayKeys($value));
+            }
+        }
+    }
+
+    // Jika data adalah objek, lakukan rekursi juga
+    if (is_object($data)) {
+        foreach ($data as $key => $value) {
+            $result = array_merge($result, $this->findArrayKeys($value));
+        }
+    }
+
+    return $result;
+}
 
     
         public function saveMapping(Request $request, $apiId)
@@ -174,8 +212,9 @@ class ApiController extends Controller
         // Mengambil data mapping dari request
         $targetFields = $request->input('target_fields'); // ['source_field1' => 'target_field1', 'source_field2' => 'target_field2']
 
+        
         // Ambil response data untuk di-mapping
-        $apiResponse = ApiResponse::where('api_id', $apiId)->first();
+        $apiResponse = ApiResponse::where('api_id', $apiId)->latestVersion()->first();
         $responseData = $apiResponse->response_data;
 
         // Pastikan responseData ada
@@ -202,14 +241,14 @@ class ApiController extends Controller
 
             $yourFormattedDataArray[] = $mappedRow;
         }
-
+        
         // Format JSON sesuai dengan mapping yang ada
         $formattedData = [
             "data_id" => $dataId,
             "tahun_data" => (int)date('Y') - 1,  // Tahun saat ini dikurangi 1
             "data" => $yourFormattedDataArray  // Data yang telah diformat sesuai mapping
         ];
-
+        
         // Simpan hasil JSON ke dalam tabel data_mappings
         DataMapping::create([
             'api_id' => $apiId,
@@ -221,6 +260,67 @@ class ApiController extends Controller
     }
 
 
+    public function konfirmasi($apiId)
+    {
+        // Ambil data dari tabel apis dan data_mappings
+        $api = Api::findOrFail($apiId);
+        $mapping = DataMapping::where('api_id', $apiId)->latest('updated_at')->first(); 
+    
+        // Pastikan response_data ada
+        $responseData = $mapping ? $mapping->jsonhasil : null;
+    
+        // Jika jsonhasil berupa string JSON, decode menjadi array
+        if ($responseData) {
+            $responseData = json_decode($responseData, true);
+        }
+        // dd($responseData);
+
+    
+        return view('api.konfirm', compact('api', 'responseData'));
+    }
+    
+
+
+    public function kirimData(Request $request, $apiId)
+{
+    $api = Api::findOrFail($apiId);
+    
+    // Ambil data mapping terbaru untuk api_id yang diupdate terakhir
+    $mapping = DataMapping::where('api_id', $apiId)->latest('updated_at')->first();  // Ambil data mapping terbaru
+    
+    // Pastikan ada data mapping yang ditemukan
+    if (!$mapping) {
+        return redirect()->route('api.index')->with('error', 'Data mapping tidak ditemukan.');
+    }
+    
+    // Siapkan data yang akan dikirim, misalnya data yang sudah dipetakan
+    $jsonData = json_decode($mapping->jsonhasil, true); // Mengambil data yang sudah dipetakan dari model 'DataMapping'
+    
+    // Token untuk Authorization
+    $token = $api->token;  // Mengambil token dari field 'token'
+
+    // Kirim request ke API tujuan
+    $response = Http::withHeaders([
+        'Authorization' => 'Bearer ' . $token,
+        'Accept' => 'application/json',
+        'Content-Type' => 'application/json',
+    ])->post('https://satudata.jatengprov.go.id/v1/data', $jsonData);
+
+    // Mengecek apakah pengiriman berhasil
+    if ($response->successful()) {
+        // Jika berhasil, update status atau informasi lainnya
+        $api->status = 'Terkirim';
+        $api->save();
+
+        return redirect()->route('api.index')->with('success', 'Data berhasil dikirim!');
+    }
+
+    // Jika gagal, kembalikan error
+    return redirect()->route('api.index')->with('error', 'Pengiriman data gagal!');
+}
+
+    
+    
     
         
     public function create()

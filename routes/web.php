@@ -27,6 +27,8 @@ Route::post('/api/{apiId}/send-request', [ApiController::class, 'sendRequest'])-
 
 Route::get('/api/{apiId}/mapping', [ApiController::class, 'showMappingForm'])->name('api.mapping');
 Route::post('/api/{apiId}/mapping', [ApiController::class, 'saveMapping'])->name('api.mapping.save');
+Route::get('/konfirmasi/{apiId}', [ApiController::class, 'konfirmasi'])->name('api.konfirm');
+Route::post('/api/kirim/{apiId}', [ApiController::class, 'kirimData'])->name('api.kirim');
 
 
 

@@ -98,6 +98,7 @@
                     @endforeach
                 </ul>
                 <button type="submit" class="btn btn-success mt-3">Save Mapping</button>
+                <a href="{{ route('api.index') }}" class="btn btn-secondary mt-3">Kembali</a>
             </form>
         </div>
     </div>
@@ -115,8 +116,16 @@
 <script>
 document.getElementById('generateFormatButton').addEventListener('click', () => {
     try {
+        // Ambil data JSON mentah dari textarea
         const rawJson = document.getElementById('sourceJson').value;
-        const sourceData = JSON.parse(rawJson);
+
+        // Cek apakah JSON valid
+        let sourceData;
+        try {
+            sourceData = JSON.parse(rawJson); // Coba parse JSON
+        } catch (e) {
+            throw new Error('Invalid JSON format in Source Fields.');
+        }
 
         const formattedData = {
             "data_id": "{{ $api->id_data }}", // Ambil data_id dari API
@@ -129,30 +138,10 @@ document.getElementById('generateFormatButton').addEventListener('click', () => 
         document.querySelectorAll('.remove-column:checked').forEach(checkbox => {
             columnsToRemove.push(checkbox.getAttribute('data-field'));
         });
-        
-        document.querySelectorAll('.remove-field').forEach(button => {
-            button.addEventListener('click', (event) => {
-                const fieldToRemove = event.target.getAttribute('data-field');
-                
-                // Hapus elemen input dari UI
-                event.target.closest('li').remove();
-                
-                // Hapus field dari JSON Preview jika sudah digenerate
-                const previewContent = document.getElementById('previewContent');
-                if (previewContent.textContent) {
-                    let jsonData = JSON.parse(previewContent.textContent);
-                    jsonData.data.forEach(row => {
-                        delete row[fieldToRemove];
-                    });
-                    previewContent.textContent = JSON.stringify(jsonData, null, 4);
-                }
-            });
-        });
 
-
-        // Iterasi setiap elemen di sourceData (baris per baris)
-        sourceData.forEach(row => {
-            let rowData = {}; // Objek baru untuk setiap baris
+        // Fungsi untuk memproses setiap row data dari JSON dan membentuk format sesuai kebutuhan
+        const processRowData = (row) => {
+            let rowData = {};
 
             // Hapus kolom yang dipilih dari row
             columnsToRemove.forEach(column => {
@@ -168,8 +157,29 @@ document.getElementById('generateFormatButton').addEventListener('click', () => 
                 }
             });
 
-            formattedData.data.push(rowData);
-        });
+            return rowData;
+        };
+
+        // Tangani jika data memiliki beberapa level atau nested array
+        if (Array.isArray(sourceData)) {
+            // Iterasi jika data adalah array
+            sourceData.forEach(row => {
+                formattedData.data.push(processRowData(row));
+            });
+        } else if (typeof sourceData === 'object') {
+            // Jika data berupa objek, kita harus mengakses field yang ada di dalamnya
+            for (const key in sourceData) {
+                if (Array.isArray(sourceData[key])) {
+                    // Jika field berupa array, iterasi array tersebut
+                    sourceData[key].forEach(row => {
+                        formattedData.data.push(processRowData(row));
+                    });
+                } else if (typeof sourceData[key] === 'object') {
+                    // Jika field berupa objek, iterasi objek tersebut
+                    formattedData.data.push(processRowData(sourceData[key]));
+                }
+            }
+        }
 
         // Menampilkan hasil JSON pada preview
         document.getElementById('previewContent').textContent = JSON.stringify(formattedData, null, 4);
