@@ -198,66 +198,128 @@ private function findArrayKeys($data)
 }
 
     
-        public function saveMapping(Request $request, $apiId)
-    {
-        // Mengambil data dari tabel apis
-        $api = Api::find($apiId);
-        if (!$api) {
-            return redirect()->back()->with('error', 'API not found');
-        }
 
-        $token = $api->token;  // Token Bearer
-        $dataId = $api->id_data; // data_id
-
-        // Mengambil data mapping dari request
-        $targetFields = $request->input('target_fields'); // ['source_field1' => 'target_field1', 'source_field2' => 'target_field2']
-
-        
-        // Ambil response data untuk di-mapping
-        $apiResponse = ApiResponse::where('api_id', $apiId)->latestVersion()->first();
-        $responseData = $apiResponse->response_data;
-
-        // Pastikan responseData ada
-        if (empty($responseData)) {
-            return redirect()->back()->with('error', 'No data found to map.');
-        }
-
-        // Jika responseData adalah string JSON, decode menjadi array
-        if (is_string($responseData)) {
-            $responseData = json_decode($responseData, true);
-        }
-
-        // Format data sesuai dengan mapping
-        $yourFormattedDataArray = [];
-
-        foreach ($responseData as $row) {
-            $mappedRow = [];
-
-            foreach ($targetFields as $sourceField => $targetField) {
-                if (isset($row[$sourceField])) {
-                    $mappedRow[$targetField] = $row[$sourceField]; // Mapping data dari source ke target
-                }
-            }
-
-            $yourFormattedDataArray[] = $mappedRow;
-        }
-        
-        // Format JSON sesuai dengan mapping yang ada
-        $formattedData = [
-            "data_id" => $dataId,
-            "tahun_data" => (int)date('Y') - 1,  // Tahun saat ini dikurangi 1
-            "data" => $yourFormattedDataArray  // Data yang telah diformat sesuai mapping
-        ];
-        
-        // Simpan hasil JSON ke dalam tabel data_mappings
-        DataMapping::create([
-            'api_id' => $apiId,
-            'jsonhasil' => json_encode($formattedData) // Menyimpan JSON hasil mapping
-        ]);
-
-        // Menambahkan notifikasi keberhasilan
-        return redirect()->back()->with('success', 'Hasil format JSON berhasil disimpan.');
+public function saveMapping(Request $request, $apiId)
+{
+    // Mengambil data dari tabel apis
+    $api = Api::find($apiId);
+    if (!$api) {
+        return redirect()->back()->with('error', 'API not found');
     }
+
+    $token = $api->token;  // Token Bearer
+    $dataId = $api->id_data; // data_id
+
+    // Mengambil data mapping dari request
+    $targetFields = $request->input('target_fields'); // ['source_field1' => 'target_field1', ...]
+
+  // Ambil response data untuk di-mapping
+$apiResponse = ApiResponse::where('api_id', $apiId)->latestVersion()->first();
+
+if (!$apiResponse) {
+    return redirect()->back()->with('error', 'No API response found.');
+}
+
+// Cek apakah response_data sudah array atau masih string JSON
+$responseData = is_array($apiResponse->response_data) 
+    ? $apiResponse->response_data 
+    : json_decode($apiResponse->response_data, true);
+
+if (!$responseData) {
+    return redirect()->back()->with('error', 'Invalid JSON response.');
+}
+
+    // Cari array utama dalam responseData
+    $mainDataArray = $this->findMainDataArray($responseData);
+
+    if (!$mainDataArray || !is_array($mainDataArray)) {
+        return redirect()->back()->with('error', 'No valid data array found.');
+    }
+
+    // Mapping data sesuai dengan targetFields
+    $yourFormattedDataArray = [];
+
+    foreach ($mainDataArray as $row) {
+        $mappedRow = [];
+
+        foreach ($targetFields as $sourceField => $targetField) {
+            $mappedRow[$targetField] = $this->getNestedValue($row, $sourceField);
+        }
+
+        $yourFormattedDataArray[] = $mappedRow;
+    }
+
+    // Format JSON sesuai dengan kebutuhan
+    $formattedData = [
+        "data_id" => $dataId,
+        "tahun_data" => (int)date('Y') - 1,
+        "data" => $yourFormattedDataArray
+    ];
+
+    // Simpan hasil JSON ke dalam tabel data_mappings
+    DataMapping::create([
+        'api_id' => $apiId,
+        'jsonhasil' => json_encode($formattedData)
+    ]);
+
+    return redirect()->back()->with('success', 'Hasil format JSON berhasil disimpan.');
+}
+
+/**
+ * Fungsi untuk menemukan array utama dalam response API secara fleksibel
+ */
+private function findMainDataArray($data)
+{
+    if (!is_array($data)) {
+        return null;
+    }
+
+    // Jika ini adalah array indeks, maka ini adalah array utama yang kita cari
+    if (!$this->isAssociativeArray($data)) {
+        return $data;
+    }
+
+    // Lakukan pencarian dalam setiap elemen array
+    foreach ($data as $key => $value) {
+        if (is_array($value)) {
+            $result = $this->findMainDataArray($value);
+            if ($result !== null) {
+                return $result;
+            }
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Fungsi untuk mengecek apakah array adalah asosiatif atau indeks
+ */
+private function isAssociativeArray($array)
+{
+    return (array_keys($array) !== range(0, count($array) - 1));
+}
+
+/**
+ * Fungsi untuk mendapatkan nilai dari array nested (bertingkat)
+ */
+private function getNestedValue($array, $key, $default = null)
+{
+    if (isset($array[$key])) {
+        return $array[$key];
+    }
+
+    foreach (explode('.', $key) as $segment) {
+        if (is_array($array) && isset($array[$segment])) {
+            $array = $array[$segment];
+        } else {
+            return $default;
+        }
+    }
+
+    return $array;
+}
+
 
 
     public function konfirmasi($apiId)
