@@ -81,6 +81,12 @@
             <h4>Target Fields (Mapping)</h4>
             <form action="{{ route('api.mapping.save', ['apiId' => $api->id]) }}" method="POST">
                 @csrf
+                <!-- Input untuk tahun_data -->
+                <div class="form-group">
+                    <label for="tahun_data">Tahun Data</label>
+                    <input type="number" class="form-control" id="tahun_data" name="tahun_data" placeholder="Masukkan Tahun Data" value="{{ old('tahun_data', date('Y') - 1) }}">
+                </div>
+
                 <ul id="targetFields">
                     @foreach($sourceFields[0] as $sourceField => $value)
                         <li class="target-item" data-field="{{ $sourceField }}">
@@ -127,9 +133,12 @@ document.getElementById('generateFormatButton').addEventListener('click', () => 
             throw new Error('Invalid JSON format in Source Fields.');
         }
 
+        // Ambil tahun_data dari input
+        const tahunData = document.getElementById('tahun_data').value;
+
         const formattedData = {
             "data_id": "{{ $api->id_data }}", // Ambil data_id dari API
-            "tahun_data": new Date().getFullYear() - 1, // Tahun saat ini dikurangi 1
+            "tahun_data": parseInt(tahunData), // Gunakan nilai tahun_data dari input
             "data": []
         };
 

@@ -203,6 +203,7 @@ private function findArrayKeys($data)
 
 public function saveMapping(Request $request, $apiId)
 {
+    
     // Mengambil data dari tabel apis
     $api = Api::find($apiId);
     if (!$api) {
@@ -214,7 +215,8 @@ public function saveMapping(Request $request, $apiId)
 
     // Mengambil data mapping dari request
     $targetFields = $request->input('target_fields'); // ['source_field1' => 'target_field1', ...]
-
+     // Mengambil tahun_data dari input pengguna, jika tidak ada gunakan default
+     $tahunData = $request->input('tahun_data');
   // Ambil response data untuk di-mapping
 $apiResponse = ApiResponse::where('api_id', $apiId)->latestVersion()->first();
 
@@ -254,7 +256,7 @@ if (!$responseData) {
     // Format JSON sesuai dengan kebutuhan
     $formattedData = [
         "data_id" => $dataId,
-        "tahun_data" => (int)date('Y') - 1,
+        "tahun_data" => (int) $tahunData,
         "data" => $yourFormattedDataArray
     ];
 
