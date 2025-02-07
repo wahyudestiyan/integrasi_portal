@@ -140,17 +140,39 @@
                     <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded-md">Upload</button>
                 </form>
             </div>
+           
 
+            <div class="d-flex justify-content-between align-items-center mb-4">
+            <!-- Form Pencarian -->
+            <form action="{{ route('api.index') }}" method="GET" class="d-flex align-items-center">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Cari Nama Instansi atau Nama Data"
+                        value="{{ request('search') }}" style="width: 400px;">
+                    <button class="btn btn-primary" type="submit">Cari</button>
+                </div>
+                @if(request('search'))
+                    <a href="{{ route('api.index') }}" class="btn btn-secondary ms-2">Tampilkan Semua</a>
+                @endif
+            </form>
 
-        <form action="{{ route('api.index') }}" method="GET" class="mb-4 d-flex align-items-center">
-            <div class="input-group w-auto">
-                <input type="text" name="search" class="form-control" placeholder="Cari Nama Instansi atau Nama Data" value="{{ request('search') }}" style="width: 400px;">
-                <button class="btn btn-primary" type="submit">Cari</button>
+            <!-- Dropdown Export -->
+            <!-- Dropdown Export -->
+        <div class="relative">
+            <button id="exportButton" type="button" class="btn btn-outline-primary">
+                <i class="fas fa-file-export"></i> <!-- Icon Export -->
+            </button>
+
+            <div id="exportDropdown" class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg hidden">
+                <a href="{{ route('api.export-excel') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    <i class="fas fa-file-excel text-green-500"></i> Download Excel
+                </a>
+                <a href="{{ route('api.export-pdf') }}" target="_blank" rel="noopener noreferrer" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    <i class="fas fa-file-pdf text-red-500"></i> Download PDF
+                </a>
             </div>
-            @if(request('search'))
-                <a href="{{ route('api.index') }}" class="btn btn-secondary ms-2">Tampilkan Semua</a>
-            @endif
-        </form>
+        </div>
+        </div>
+
 
         @if (session('warning'))
         <div class="alert alert-warning animated-alert">
@@ -179,7 +201,7 @@
             <tr>
                 <th class="py-2 px-4 border border-gray-300">No</th>
                 <th class="py-2 px-4 border border-gray-300">Nama Instansi</th>
-                <th class="py-2 px-4 border border-gray-300">Nama Data</th>
+                <th class="py-2 px-4 border border-gray-300">Judul Data</th>
                 <th class="py-2 px-4 border border-gray-300">URL API</th>
                 <th class="py-2 px-4 border border-gray-300">Method</th>
                 <th class="py-2 px-4 border border-gray-300">Status</th>
@@ -210,7 +232,7 @@
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-danger me-2">Hapus</button>
                         </form> -->
-                        <a href="{{ route('api.mapping', $api->id) }}" class="btn btn-sm btn-warning">mapping</a>
+                        <a href="{{ route('api.mapping', $api->id) }}" class="btn btn-sm btn-warning me-2">mapping</a>
                         <a href="{{ route('api.konfirm', $api->id) }}" class="btn btn-sm btn-success">Kirim</a>
                     </div>
                 </td>
@@ -347,7 +369,22 @@
             }, 5000);
         }
     });
+    // download excel dan pdf
+    document.addEventListener("DOMContentLoaded", function () {
+        const button = document.querySelector("#exportButton");
+        const dropdown = document.querySelector("#exportDropdown");
 
+        button.addEventListener("click", function () {
+            dropdown.classList.toggle("hidden");
+        });
+
+        // Tutup dropdown jika klik di luar
+        document.addEventListener("click", function (event) {
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add("hidden");
+            }
+        });
+    });
     </script>
 
     @endsection

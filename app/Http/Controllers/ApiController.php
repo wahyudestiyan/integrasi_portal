@@ -11,6 +11,8 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use PDF;
+use App\Exports\ApiExport;
 
 
 class ApiController extends Controller
@@ -381,9 +383,6 @@ private function getNestedValue($array, $key, $default = null)
     return redirect()->route('api.index')->with('error', 'Pengiriman data gagal!');
 }
 
-    
-    
-    
         
     public function create()
     {
@@ -467,4 +466,22 @@ private function getNestedValue($array, $key, $default = null)
         return redirect()->route('api.index')->with('success', 'Data API berhasil dihapus.');
     }
 
+    public function exportExcel()
+    {
+        return Excel::download(new ApiExport, 'rekap_api.xlsx');
+    }
+
+    // Fungsi untuk export PDF
+    public function exportPDF()
+    {
+        $apis = Api::all(); // Ambil data dari database
+        $pdf = PDF::loadView('api.pdf', compact('apis'));
+    
+        // Mengatur ukuran kertas menjadi F4 dan orientasi Landscape
+        $pdf->setPaper('F4', 'landscape');
+    
+        return response($pdf->output())
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="data-export.pdf"');
+    }
 }
