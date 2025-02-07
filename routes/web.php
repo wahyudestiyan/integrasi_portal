@@ -2,10 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\LoginController;
 
+
+Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('login', [LoginController::class, 'login']);
+Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 // Route default diarahkan ke API Index
-Route::get('/', [ApiController::class, 'index'])->name('api.index');
+Route::get('/', [ApiController::class, 'index'])->name('api.index')->middleware('auth'); 
 
 //route download excel dan upload
 Route::get('/apis/download-template', [ApiController::class, 'downloadTemplate'])->name('apis.download-template');
@@ -33,7 +38,6 @@ Route::post('/api/kirim/{apiId}', [ApiController::class, 'kirimData'])->name('ap
 
 Route::get('/api/export-excel', [ApiController::class, 'exportExcel'])->name('api.export-excel');
 Route::get('/api/export-pdf', [ApiController::class, 'exportPdf'])->name('api.export-pdf');
-
 
 
 
