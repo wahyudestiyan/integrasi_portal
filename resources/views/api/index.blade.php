@@ -235,11 +235,11 @@
                         <a class="btn btn-sm btn-info me-2" data-bs-toggle="modal" data-bs-target="#modalLihat{{ $api->id }}">
                             Lihat
                         </a>
-                        <!-- <form action="{{ route('apis.destroy', $api->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                        <form action="{{ route('apis.destroy', $api->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-danger me-2">Hapus</button>
-                        </form> -->
+                        </form>
                         <a href="{{ route('api.mapping', $api->id) }}" class="btn btn-sm btn-warning me-2">mapping</a>
                         <a href="{{ route('api.konfirm', $api->id) }}" class="btn btn-sm btn-success">Kirim</a>
                     </div>
