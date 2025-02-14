@@ -52,15 +52,27 @@ class ApiController extends Controller
         ],
     ];
 
+    // Menambahkan token ke header jika ada
     if (!empty($credentialKey)) {
         $options['headers']['Authorization'] = 'Bearer ' . $credentialKey;
     }
 
+    // Menambahkan parameter dan token ke body request jika metode adalah POST
     if (!empty($params)) {
         if ($method == 'GET') {
+            // Menambahkan parameter ke query string untuk GET
             $urlApi .= (strpos($urlApi, '?') === false ? '?' : '&') . http_build_query($params);
-        } else {
-            $options['form_params'] = $params;
+        } elseif ($method == 'POST') {
+            // Menambahkan token ke dalam body jika POST dan key 'token' belum ada
+            if (!isset($params['token']) && !empty($credentialKey)) {
+                $params['token'] = $credentialKey; // Menambahkan token ke body
+            }
+            // Menambahkan tahun ke dalam body jika ada
+            if ($tahun && !isset($params['tahun'])) {
+                $params['tahun'] = $tahun; // Menambahkan tahun ke body jika belum ada
+            }
+            // Masukkan semua parameter ke dalam form_params untuk body POST
+            $options['form_params'] = $params; // Untuk x-www-form-urlencoded
         }
     }
 
