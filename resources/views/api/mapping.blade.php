@@ -56,6 +56,7 @@
         font-family: monospace;
     }
 </style>
+
 @if (session('success'))
     <div class="alert alert-success">
         {{ session('success') }}
@@ -87,6 +88,9 @@
                     <input type="number" class="form-control" id="tahun_data" name="tahun_data" placeholder="Masukkan Tahun Data" value="{{ old('tahun_data', date('Y') - 1) }}">
                 </div>
 
+                <!-- Input tersembunyi untuk menyimpan urutan -->
+                <input type="hidden" name="target_fields_order" id="target_fields_order" value="[]">
+
                 <ul id="targetFields">
                     @foreach($sourceFields[0] as $sourceField => $value)
                         <li class="target-item" data-field="{{ $sourceField }}">
@@ -97,8 +101,6 @@
                                 placeholder="Enter Target Field" 
                                 value="{{ old('target_fields.' . $sourceField, $sourceField) }}">
 
-                            <!-- <input type="checkbox" class="remove-column" id="remove_{{ $sourceField }}" data-field="{{ $sourceField }}"> -->
-                            <!-- <label for="remove_{{ $sourceField }}">Remove</label> -->
                             <button type="button" class="btn btn-danger btn-sm remove-field" data-field="{{ $sourceField }}">Remove</button>
                         </li>
                     @endforeach
@@ -122,45 +124,36 @@
 <script>
 document.getElementById('generateFormatButton').addEventListener('click', () => {
     try {
-        // Ambil data JSON mentah dari textarea
         const rawJson = document.getElementById('sourceJson').value;
-
-        // Cek apakah JSON valid
         let sourceData;
         try {
-            sourceData = JSON.parse(rawJson); // Coba parse JSON
+            sourceData = JSON.parse(rawJson); 
         } catch (e) {
             throw new Error('Invalid JSON format in Source Fields.');
         }
 
-        // Ambil tahun_data dari input
         const tahunData = document.getElementById('tahun_data').value;
 
         const formattedData = {
-            "data_id": "{{ $api->id_data }}", // Ambil data_id dari API
-            "tahun_data": parseInt(tahunData), // Gunakan nilai tahun_data dari input
+            "data_id": "{{ $api->id_data }}", 
+            "tahun_data": parseInt(tahunData), 
             "data": []
         };
 
-        // Ambil daftar kolom yang akan dihapus berdasarkan checkbox
         const columnsToRemove = [];
         document.querySelectorAll('.remove-column:checked').forEach(checkbox => {
             columnsToRemove.push(checkbox.getAttribute('data-field'));
         });
 
-        // Fungsi untuk memproses setiap row data dari JSON dan membentuk format sesuai kebutuhan
         const processRowData = (row) => {
             let rowData = {};
-
-            // Hapus kolom yang dipilih dari row
             columnsToRemove.forEach(column => {
                 delete row[column];
             });
 
-            // Ambil semua field yang ada di target
             document.querySelectorAll('.target-item input').forEach(input => {
                 const field = input.getAttribute('id').replace('target_field_', '');
-                const targetField = input.value.trim() || field; // Default ke field aslinya jika kosong
+                const targetField = input.value.trim() || field; 
                 if (row.hasOwnProperty(field)) {
                     rowData[targetField] = row[field];
                 }
@@ -169,28 +162,22 @@ document.getElementById('generateFormatButton').addEventListener('click', () => 
             return rowData;
         };
 
-        // Tangani jika data memiliki beberapa level atau nested array
         if (Array.isArray(sourceData)) {
-            // Iterasi jika data adalah array
             sourceData.forEach(row => {
                 formattedData.data.push(processRowData(row));
             });
         } else if (typeof sourceData === 'object') {
-            // Jika data berupa objek, kita harus mengakses field yang ada di dalamnya
             for (const key in sourceData) {
                 if (Array.isArray(sourceData[key])) {
-                    // Jika field berupa array, iterasi array tersebut
                     sourceData[key].forEach(row => {
                         formattedData.data.push(processRowData(row));
                     });
                 } else if (typeof sourceData[key] === 'object') {
-                    // Jika field berupa objek, iterasi objek tersebut
                     formattedData.data.push(processRowData(sourceData[key]));
                 }
             }
         }
 
-        // Menampilkan hasil JSON pada preview
         document.getElementById('previewContent').textContent = JSON.stringify(formattedData, null, 4);
         document.getElementById('jsonPreview').style.display = 'block';
     } catch (error) {
@@ -198,11 +185,24 @@ document.getElementById('generateFormatButton').addEventListener('click', () => 
     }
 });
 
-// Event listener untuk tombol "Remove"
 document.querySelectorAll('.remove-field').forEach(button => {
     button.addEventListener('click', (event) => {
         event.target.closest('li').remove();
     });
 });
+
+// Sorting dengan SortableJS
+document.addEventListener('DOMContentLoaded', function () {
+    const targetFieldsList = document.getElementById('targetFields');
+    new Sortable(targetFieldsList, {
+        handle: '.target-item',
+        animation: 150,
+        onEnd: function (evt) {
+            const order = Array.from(targetFieldsList.children).map((item) => item.getAttribute('data-field'));
+            document.getElementById('target_fields_order').value = JSON.stringify(order);
+        }
+    });
+});
 </script>
+
 @endsection

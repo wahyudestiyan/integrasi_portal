@@ -215,7 +215,6 @@ private function findArrayKeys($data)
 
 public function saveMapping(Request $request, $apiId)
 {
-    
     // Mengambil data dari tabel apis
     $api = Api::find($apiId);
     if (!$api) {
@@ -227,23 +226,35 @@ public function saveMapping(Request $request, $apiId)
 
     // Mengambil data mapping dari request
     $targetFields = $request->input('target_fields'); // ['source_field1' => 'target_field1', ...]
-     // Mengambil tahun_data dari input pengguna, jika tidak ada gunakan default
-     $tahunData = $request->input('tahun_data');
-  // Ambil response data untuk di-mapping
-$apiResponse = ApiResponse::where('api_id', $apiId)->latestVersion()->first();
+    // Mengambil tahun_data dari input pengguna, jika tidak ada gunakan default
+    $tahunData = $request->input('tahun_data');
+    
+            // Ambil data dari request
+        $targetFieldsOrder = $request->input('target_fields_order');
 
-if (!$apiResponse) {
-    return redirect()->back()->with('error', 'No API response found.');
-}
+        // Validasi apakah targetFieldsOrder berbentuk array
+        if (empty($targetFieldsOrder) || !is_array(json_decode($targetFieldsOrder, true))) {
+            return redirect()->back()->with('error', 'Target fields order should be an array.');
+        }
 
-// Cek apakah response_data sudah array atau masih string JSON
-$responseData = is_array($apiResponse->response_data) 
-    ? $apiResponse->response_data 
-    : json_decode($apiResponse->response_data, true);
+        // Dekode JSON jika perlu
+        $targetFieldsOrder = json_decode($targetFieldsOrder, true);
+        
+    // Ambil response data untuk di-mapping
+    $apiResponse = ApiResponse::where('api_id', $apiId)->latestVersion()->first();
 
-if (!$responseData) {
-    return redirect()->back()->with('error', 'Invalid JSON response.');
-}
+    if (!$apiResponse) {
+        return redirect()->back()->with('error', 'No API response found.');
+    }
+
+    // Cek apakah response_data sudah array atau masih string JSON
+    $responseData = is_array($apiResponse->response_data) 
+        ? $apiResponse->response_data 
+        : json_decode($apiResponse->response_data, true);
+
+    if (!$responseData) {
+        return redirect()->back()->with('error', 'Invalid JSON response.');
+    }
 
     // Cari array utama dalam responseData
     $mainDataArray = $this->findMainDataArray($responseData);
@@ -252,14 +263,21 @@ if (!$responseData) {
         return redirect()->back()->with('error', 'No valid data array found.');
     }
 
+    // Debugging log untuk melihat data
+    \Log::debug('targetFieldsOrder:', $targetFieldsOrder);
+    \Log::debug('mainDataArray:', $mainDataArray);
+    \Log::debug('targetFields:', $targetFields);
+
     // Mapping data sesuai dengan targetFields
     $yourFormattedDataArray = [];
 
     foreach ($mainDataArray as $row) {
         $mappedRow = [];
 
-        foreach ($targetFields as $sourceField => $targetField) {
-            $mappedRow[$targetField] = $this->getNestedValue($row, $sourceField);
+        foreach ($targetFieldsOrder as $field) {
+            if (isset($targetFields[$field])) {
+                $mappedRow[$targetFields[$field]] = $this->getNestedValue($row, $field);
+            }
         }
 
         $yourFormattedDataArray[] = $mappedRow;
@@ -280,6 +298,7 @@ if (!$responseData) {
 
     return redirect()->back()->with('success', 'Hasil format JSON berhasil disimpan.');
 }
+
 
 /**
  * Fungsi untuk menemukan array utama dalam response API secara fleksibel
