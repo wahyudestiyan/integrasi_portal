@@ -38,6 +38,8 @@ Route::post('/api/kirim/{apiId}', [ApiController::class, 'kirimData'])->name('ap
 
 Route::get('/api/export-excel', [ApiController::class, 'exportExcel'])->name('api.export-excel');
 Route::get('/api/export-pdf', [ApiController::class, 'exportPdf'])->name('api.export-pdf');
+Route::get('/export-mapping/{apiId}', [ApiController::class, 'exportToExcel'])->name('export.mapping');
+
 
 
 

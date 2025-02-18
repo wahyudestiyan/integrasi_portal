@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use PDF;
 use App\Exports\ApiExport;
+use App\Exports\MappingExport;
 
 
 class ApiController extends Controller
@@ -228,18 +229,18 @@ public function saveMapping(Request $request, $apiId)
     $targetFields = $request->input('target_fields'); // ['source_field1' => 'target_field1', ...]
     // Mengambil tahun_data dari input pengguna, jika tidak ada gunakan default
     $tahunData = $request->input('tahun_data');
+
+    // Ambil data dari request
+    $targetFieldsOrder = $request->input('target_fields_order');
+
+    // Validasi apakah targetFieldsOrder berbentuk array
+    if (empty($targetFieldsOrder) || !is_array(json_decode($targetFieldsOrder, true))) {
+        return redirect()->back()->with('error', 'Target fields order should be an array.');
+    }
+
+    // Dekode JSON jika perlu
+    $targetFieldsOrder = json_decode($targetFieldsOrder, true);
     
-            // Ambil data dari request
-        $targetFieldsOrder = $request->input('target_fields_order');
-
-        // Validasi apakah targetFieldsOrder berbentuk array
-        if (empty($targetFieldsOrder) || !is_array(json_decode($targetFieldsOrder, true))) {
-            return redirect()->back()->with('error', 'Target fields order should be an array.');
-        }
-
-        // Dekode JSON jika perlu
-        $targetFieldsOrder = json_decode($targetFieldsOrder, true);
-        
     // Ambil response data untuk di-mapping
     $apiResponse = ApiResponse::where('api_id', $apiId)->latestVersion()->first();
 
@@ -274,13 +275,24 @@ public function saveMapping(Request $request, $apiId)
     foreach ($mainDataArray as $row) {
         $mappedRow = [];
 
+        // Loop setiap field yang ada di targetFieldsOrder
         foreach ($targetFieldsOrder as $field) {
             if (isset($targetFields[$field])) {
                 $mappedRow[$targetFields[$field]] = $this->getNestedValue($row, $field);
+            } else {
+                \Log::debug('Field not found in targetFields: ' . $field);
             }
         }
 
-        $yourFormattedDataArray[] = $mappedRow;
+        // Pastikan baris yang dimapping tidak kosong
+        if (!empty($mappedRow)) {
+            $yourFormattedDataArray[] = $mappedRow;
+        }
+    }
+
+    // Pastikan data tidak kosong
+    if (empty($yourFormattedDataArray)) {
+        return redirect()->back()->with('error', 'Mapped data is empty.');
     }
 
     // Format JSON sesuai dengan kebutuhan
@@ -306,6 +318,7 @@ public function saveMapping(Request $request, $apiId)
 private function findMainDataArray($data)
 {
     if (!is_array($data)) {
+        \Log::error('Expected array but received: ' . gettype($data));
         return null;
     }
 
@@ -338,8 +351,11 @@ private function isAssociativeArray($array)
 /**
  * Fungsi untuk mendapatkan nilai dari array nested (bertingkat)
  */
-private function getNestedValue($array, $key, $default = null)
+public function getNestedValue($array, $key, $default = null)
 {
+    // Log untuk melihat nilai array dan key yang sedang diproses
+    \Log::debug('Checking value for key:', [$key, $array]);
+
     if (isset($array[$key])) {
         return $array[$key];
     }
@@ -354,7 +370,6 @@ private function getNestedValue($array, $key, $default = null)
 
     return $array;
 }
-
 
 
     public function konfirmasi($apiId)
@@ -516,5 +531,11 @@ private function getNestedValue($array, $key, $default = null)
         return response($pdf->output())
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="data-export.pdf"');
+    }
+
+    public function exportToExcel($apiId)
+    {
+        // Pastikan $apiId ada dan diteruskan dengan benar ke MappingExport
+        return Excel::download(new MappingExport($apiId), 'mapping_data.xlsx');
     }
 }

@@ -107,6 +107,7 @@
                 </ul>
                 <button type="submit" class="btn btn-success mt-3">Save Mapping</button>
                 <a href="{{ route('api.index') }}" class="btn btn-secondary mt-3">Kembali</a>
+                <a href="{{ route('export.mapping', ['apiId' => $api->id]) }}" class="btn btn-warning mt-3">Export Excel</a>
             </form>
         </div>
     </div>
