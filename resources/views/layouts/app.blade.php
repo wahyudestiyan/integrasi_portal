@@ -97,9 +97,9 @@
     @auth
     <!-- Sidebar -->
     <aside class="sidebar">
-        <a href="{{ route('/') }}" class="block text-2xl font-bold mb-4 text-white hover:text-gray-300">
+    <a href="{{ url('/') }}" class="block text-2xl font-bold mb-4 text-white hover:text-gray-300">
             Dashboard
-        </a>
+    </a>
 
         <nav x-data="{ open: false }">
             <ul>
