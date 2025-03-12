@@ -5,15 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Api extends Model
+class ApiBps extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    protected $table = 'apibps'; // Pastikan nama tabel sesuai dengan di database
+
     protected $fillable = [
         'nama_instansi',
         'nama_data',
@@ -25,16 +22,15 @@ class Api extends Model
         'status',
     ];
 
-
     // Relasi ke ApiResponse
     public function apiResponses()
     {
-        return $this->hasMany(ApiResponse::class, 'api_id');
+        return $this->hasMany(ApiResponse::class, 'apibps_id');
     }
 
     // Relasi ke DataMapping
     public function dataMappings()
     {
-        return $this->hasMany(DataMapping::class, 'api_id');
+        return $this->hasMany(DataMapping::class, 'apibps_id');
     }
 }

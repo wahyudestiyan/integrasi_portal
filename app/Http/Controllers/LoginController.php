@@ -23,7 +23,7 @@ class LoginController extends Controller
         // Cek kredensial pengguna
         if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
             // Login berhasil, redirect ke halaman index
-            return redirect()->route('api.index');
+            return redirect()->route('home');
         }
 
         // Login gagal, kembali ke form login dengan error

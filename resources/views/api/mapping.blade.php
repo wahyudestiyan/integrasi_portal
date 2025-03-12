@@ -68,7 +68,9 @@
         {{ session('error') }}
     </div>
 @endif
-
+<div class="container">
+<h2 class="fs-4 mb-4">Nama Data : <strong>{{ $api->nama_data }}</strong></h2>
+</div>
 <div class="container">
     <div class="row">
         <!-- Source Fields sebagai Textarea -->

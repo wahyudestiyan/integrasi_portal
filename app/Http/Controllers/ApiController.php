@@ -126,7 +126,9 @@ class ApiController extends Controller
     }
 }
 
-    
+
+//FUNGSI API OPD
+
    public function showMappingForm($apiId)
 {
     // Ambil data API berdasarkan id
@@ -407,7 +409,7 @@ public function getNestedValue($array, $key, $default = null)
     
     // Siapkan data yang akan dikirim, misalnya data yang sudah dipetakan
     $jsonData = json_decode($mapping->jsonhasil, true); // Mengambil data yang sudah dipetakan dari model 'DataMapping'
-    
+    // dd($jsonData);
     // Token untuk Authorization
     $token = $api->token;  // Mengambil token dari field 'token'
 

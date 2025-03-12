@@ -139,14 +139,6 @@
                     <!-- Tombol Upload (Kanan) -->
                     <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded-md">Upload</button>
                 </form>
-
-                <!-- Tombol Logout -->
-                <form action="{{ route('logout') }}" method="POST" style="position: absolute; top: 10px; right: 10px;">
-                    @csrf
-                    <button type="submit" class="btn btn-danger" title="Logout">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                </form>
             </div>
            
 

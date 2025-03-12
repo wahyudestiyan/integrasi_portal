@@ -3,14 +3,18 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\LoginController;
-
+use App\Http\Controllers\VisualisasiController;
+use App\Http\Controllers\ApiBpsController;
+use App\Http\Controllers\HomeController;
 
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-// Route default diarahkan ke API Index
-Route::get('/', [ApiController::class, 'index'])->name('api.index')->middleware('auth'); 
+Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('auth');
+
+Route::get('/api', [ApiController::class, 'index'])->name('api.index')->middleware('auth');
+
 
 //route download excel dan upload
 Route::get('/apis/download-template', [ApiController::class, 'downloadTemplate'])->name('apis.download-template');
@@ -41,6 +45,55 @@ Route::get('/api/export-pdf', [ApiController::class, 'exportPdf'])->name('api.ex
 Route::get('/export-mapping/{apiId}', [ApiController::class, 'exportToExcel'])->name('export.mapping');
 
 
+// visualisasi
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/visualisasi/create', [VisualisasiController::class, 'create'])->name('visualisasi.create');
+    Route::post('/visualisasi/import', [VisualisasiController::class, 'import'])->name('visualisasi.import');
+    Route::get('/visualisasi/download-template', [VisualisasiController::class, 'downloadTemplate'])->name('visualisasi.download-template');
+});
+
+Route::get('/visualisasi/create', [VisualisasiController::class, 'create'])->name('visualisasi.create');
+Route::post('/visualisasi/import', [VisualisasiController::class, 'import'])->name('visualisasi.import');
+
+Route::get('/visualisasi', [VisualisasiController::class, 'index'])->name('visualisasi.index');
+Route::get('/visualisasi/{instansiId}/data', [VisualisasiController::class, 'getDataInstansi']);
+// Route::get('/visualisasi/{instansiId}/data/{dataId}', [VisualisasiController::class, 'getDetailData']);
+Route::get('/visualisasi/{instansiId}/data/{dataId}/detail', [VisualisasiController::class, 'show'])->name('visualisasi.detail');
+Route::get('/visualisasi/{instansiId}/data/{dataId}/tabulasi', [VisualisasiController::class, 'tabulasi'])->name('visualisasi.tabulasi');
+
+Route::post('/tabulasi', [VisualisasiController::class, 'tabulasi'])->name('tabulasi');
+
+
+//ROUTE FUNGSI BPS API
+Route::get('/apibps', [ApiBpsController::class, 'index'])->name('apibps.index')->middleware('auth');
+//route download excel dan upload
+Route::get('/apibps/download-template', [ApiBpsController::class, 'downloadTemplate'])->name('apibps.download-template');
+Route::post('/apibps/import', [ApiBpsController::class, 'importTemplate'])->name('apibps.import');
+Route::post('/apibps/{apiId}/send-request', [ApiBpsController::class, 'sendRequestApi'])->name('apibps.send_request');
+
+// Route::get('/apibps/{apiId}/mapping', [ApiBpsController::class, 'showMappingFormBps'])->name('mapping.form');
+// Route::post('/apibps/{apiId}/mapping', [ApiBpsController::class, 'submitMappingFormBps'])->name('mapping.submit');
+
+Route::prefix('apibps')->group(function () {
+    Route::get('/mapping/{apibps_id}', [ApiBpsController::class, 'showMappingFormBps'])->name('apibps.mappingForm');
+    Route::post('/preview-mapping/{apibps_id}', [ApiBpsController::class, 'previewMappingBps'])->name('apibps.previewMapping');
+    Route::post('/save-mapping/{apibps_id}', [ApiBpsController::class, 'saveMappingBps'])->name('apibps.saveMapping');
+    Route::get('/{apibpsId}/konfirmasi', [ApiBpsController::class, 'konfirmasi'])->name('apibps.konfirmasi');
+Route::post('/{apibpsId}/kirim', [ApiBpsController::class, 'kirimData'])->name('apibps.kirim');
+Route::get('/export-api-bps', [ApiBpsController::class, 'exportApiBps'])->name('export.api.bps');
+Route::get('/apibps/export-pdf', [ApiBpsController::class, 'exportPdfBps'])->name('apibps.export-pdf');
+Route::delete('apibps/{id}', [ApiBpsController::class, 'destroy'])->name('apis.destroy');
+
+});
+// Route::post('/apibps/{id}/mapping', [ApiBpsController::class, 'storeMapping'])->name('apibps.mapping.store');
+
+
+
+    
+
+// Route lainnya
+Route::get('/apibps/create', [ApiBpsController::class, 'create'])->name('apibps.create');
 
 
 // Route::get('/api/api-konfirm/{id}', [ApiController::class, 'apiKonfirm'])->name('api.konfirm');
