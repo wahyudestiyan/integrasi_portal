@@ -97,7 +97,7 @@
     @auth
     <!-- Sidebar -->
     <aside class="sidebar">
-        <a href="{{ route('home') }}" class="block text-2xl font-bold mb-4 text-white hover:text-gray-300">
+        <a href="{{ route('/') }}" class="block text-2xl font-bold mb-4 text-white hover:text-gray-300">
             Dashboard
         </a>
 
