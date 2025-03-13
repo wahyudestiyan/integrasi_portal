@@ -87,7 +87,7 @@ Route::get('/export-pdf', [ApiBpsController::class, 'exportPdfBps'])->name('apib
 });
 
 
-Route::delete('apibps/{id}', [ApiBpsController::class, 'destroy'])->name('apibps.destroy');
+Route::delete('/apibps/del/{id}', [ApiBpsController::class, 'destroy'])->name('apibps.destroy');
 
 // Route::post('/apibps/{id}/mapping', [ApiBpsController::class, 'storeMapping'])->name('apibps.mapping.store');
 

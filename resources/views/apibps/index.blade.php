@@ -328,11 +328,12 @@ td:nth-child(4) { /* Kolom URL API */
                     <a class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#modalLihat{{ $api->id }}">
                         Lihat
                     </a>
-                    <form action="{{ url('apibps/'.$api->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                    <form action="{{ url('apibps/del/'.$api->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
                     </form>
+
                     <a href="{{ route('apibps.mappingForm', $api->id) }}" class="btn btn-sm btn-warning">Mapping</a> 
                     <a href="{{ route('apibps.konfirmasi', $api->id) }}" class="btn btn-sm btn-success">Kirim</a>
                 </div>
