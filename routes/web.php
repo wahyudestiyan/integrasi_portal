@@ -83,11 +83,12 @@ Route::prefix('apibps')->group(function () {
 Route::post('/{apibpsId}/kirim', [ApiBpsController::class, 'kirimData'])->name('apibps.kirim');
 Route::get('/export-api-bps', [ApiBpsController::class, 'exportApiBps'])->name('export.api.bps');
 Route::get('/export-pdf', [ApiBpsController::class, 'exportPdfBps'])->name('apibps.export-pdf');
+Route::delete('/del/{id}', [ApiBpsController::class, 'destroy'])->name('apibps.destroy');
 
 });
 
 
-Route::delete('/apibps/del/{id}', [ApiBpsController::class, 'destroy'])->name('apibps.destroy');
+
 
 // Route::post('/apibps/{id}/mapping', [ApiBpsController::class, 'storeMapping'])->name('apibps.mapping.store');
 
