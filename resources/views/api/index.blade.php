@@ -5,123 +5,215 @@
     @section('content')
 
     <style>
-        table {
-            table-layout: fixed;
-            width: 100%;
-        }
-        th, td {
-            word-wrap: break-word;
-            white-space: normal;
-        }
-        .bg-red-500 {
-            background-color: #f56565 !important;
-        }
-        .bg-blue-500 {
-            background-color: #0A97B0 !important;
-        }
-        .bg-green-500 {
-            background-color: #5CB338 !important;
-        }
-        .bg-gray-300 {
-            background-color: #3E5879 !important;
-        }
-        .alert-warning {
-            background-color: #fff3cd;
-            border-color: #ffeeba;
-            color: #856404;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-        .animated-alert {
-            animation: fadeIn 1s ease-in-out;
-        }
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .pagination {
-            justify-content: flex-end;
-        }
-        .pagination .page-item .page-link {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem;
-        }
-        .api-details {
-            max-width: 100%;
-            margin: 0 auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+          * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
 
+    table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Memastikan tabel tidak berubah */
+}
+
+th, td {
+    word-break: break-word;
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    vertical-align: middle;
+}
+td:nth-child(4) { /* Kolom URL API */
+    max-width: 250px; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media screen and (max-width: 768px) {
+    td:nth-child(4) {
+        white-space: normal; /* Biar wrap di layar kecil */
+    }
+}
+    /* Warna latar belakang khusus */
+    .bg-red-500 {
+        background-color: #f56565 !important;
+    }
+    .bg-blue-500 {
+        background-color: #0A97B0 !important;
+    }
+    .bg-green-500 {
+        background-color: #5CB338 !important;
+    }
+    .bg-gray-300 {
+        background-color: #3E5879 !important;
+    }
+    .status-badge {
+    font-size: 13px !important;
+    padding: 1px 4px !important;
+    border-radius: 10px !important;
+    line-height: 1 !important;
+}
+
+
+    /* Styling Alert */
+    .alert {
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        font-size: 16px;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        color: #856404;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+
+    .animated-alert {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: flex-end;
+        list-style: none;
+        padding: 10px;
+    }
+
+    .pagination .page-item {
+        margin: 0 3px;
+    }
+
+    .pagination .page-item .page-link {
+        padding: 6px 12px;
+        font-size: 14px;
+        text-decoration: none;
+        color: #007bff;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+    }
+
+    .pagination .page-item .page-link:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* API Details */
+    .api-details {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .api-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 100%;
+        flex-wrap: wrap;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .label {
+        font-weight: bold;
+        min-width: 150px;
+    }
+
+    .value {
+        flex-grow: 1;
+        word-break: break-word;
+    }
+
+    .api-item a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .api-item a:hover {
+        text-decoration: underline;
+    }
+
+    /* Tombol Submit */
+    .btn-submit {
+        padding: 12px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: inline-block;
+        text-align: center;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+
+    .btn-submit:hover {
+        background-color: #0056b3;
+    }
+
+    /* Kotak Response */
+    .response-container {
+        margin-top: 15px;
+    }
+
+    .response-box {
+        max-height: 400px;
+        overflow-y: auto;
+        background-color: #000000;
+        color: #00ff00;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 14px;
+    }
+
+    /* Responsiveness */
+    @media (max-width: 768px) {
         .api-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
         }
 
         .label {
-            font-weight: bold;
-            min-width: 150px;
+            width: 100%;
+            margin-bottom: 5px;
         }
 
-        .value {
-            flex-grow: 1;
-        }
-
-        .api-item a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .api-item a:hover {
-            text-decoration: underline;
+        .pagination {
+            justify-content: center;
         }
 
         .btn-submit {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            width: 100%;
             text-align: center;
         }
+    }
 
-        .btn-submit:hover {
-            background-color: #0056b3;
-        }
-        .response-container {
-            margin-top: 15px;
-        }
-
-        .response-box {
-            max-height: 380px;
-            overflow-y: auto;
-            background-color: #000000;
-            color: #00ff00;
-            padding: 10px;
-            border-radius: 5px;
-        }
     </style>
             <div class="mb-4 flex items-center space-x-4">
                 <!-- Tombol Unduh Template (Kiri) -->
@@ -191,9 +283,9 @@
             <col style="width: 6%;">
             <col style="width: 13%;">
             <col style="width: 20%;">
-            <col style="width: 25%;">
-            <col style="width: 8%;">
-            <col style="width: 8%;">
+            <col style="width: 15%;">
+            <col style="width: 10%;">
+            <col style="width: 12%;">
             <col style="width: 15%;">
         </colgroup>
 
@@ -217,22 +309,22 @@
                 <td class="py-2 px-4 border border-gray-300">{{ $api->url_api }}</td>
                 <td class="py-2 px-4 border border-gray-300 text-center">{{ $api->method }}</td>
                 <td class="py-2 px-4 border border-gray-300 text-center">
-                    <span class="inline-block py-1 px-2 text-xs font-semibold rounded-full text-white 
-                        {{ $api->status == 'Belum Terkirim' ? 'bg-red-500' : 'bg-green-500' }}">
-                        {{ $api->status }}
-                    </span>
+                <span class="status-badge text-white 
+                    {{ $api->status == 'Belum Terkirim' ? 'bg-red-500' : 'bg-green-500' }}">
+                    {{ $api->status }}
+                </span>
                 </td>
                 <td class="py-2 px-4 border border-gray-300 text-center w-48">
-                    <div class="d-flex justify-content-center">
-                        <a class="btn btn-sm btn-info me-2" data-bs-toggle="modal" data-bs-target="#modalLihat{{ $api->id }}">
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <a class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#modalLihat{{ $api->id }}">
                             Lihat
                         </a>
                         <form action="{{ route('apis.destroy', $api->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger me-2">Hapus</button>
+                            <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
                         </form>
-                        <a href="{{ route('api.mapping', $api->id) }}" class="btn btn-sm btn-warning me-2">mapping</a>
+                        <a href="{{ route('api.mapping', $api->id) }}" class="btn btn-sm btn-warning">Mapping</a>
                         <a href="{{ route('api.konfirm', $api->id) }}" class="btn btn-sm btn-success">Kirim</a>
                     </div>
                 </td>

@@ -114,7 +114,7 @@ class ApiBpsController extends Controller
         $apibps = ApiBps::findOrFail($id); // Menemukan API berdasarkan ID
         $apibps->delete(); // Menghapus API dari database
 
-        return redirect()->route('api.index')->with('success', 'Data API berhasil dihapus.');
+        return redirect()->route('apibps.index')->with('success', 'Data API berhasil dihapus.');
     }
 
     public function exportExcel()
