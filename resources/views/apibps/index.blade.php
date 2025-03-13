@@ -328,7 +328,7 @@ td:nth-child(4) { /* Kolom URL API */
                     <a class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#modalLihat{{ $api->id }}">
                         Lihat
                     </a>
-                    <form action="{{ route('apibps.destroy', $api->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                    <form action="{{ url('apibps/'.$api->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
