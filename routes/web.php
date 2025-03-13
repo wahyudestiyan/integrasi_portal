@@ -82,8 +82,8 @@ Route::prefix('apibps')->group(function () {
     Route::get('/{apibpsId}/konfirmasi', [ApiBpsController::class, 'konfirmasi'])->name('apibps.konfirmasi');
 Route::post('/{apibpsId}/kirim', [ApiBpsController::class, 'kirimData'])->name('apibps.kirim');
 Route::get('/export-api-bps', [ApiBpsController::class, 'exportApiBps'])->name('export.api.bps');
-Route::get('/apibps/export-pdf', [ApiBpsController::class, 'exportPdfBps'])->name('apibps.export-pdf');
-Route::delete('apibps/{id}', [ApiBpsController::class, 'destroy'])->name('apibps.destroy');
+Route::get('/export-pdf', [ApiBpsController::class, 'exportPdfBps'])->name('apibps.export-pdf');
+Route::delete('{id}', [ApiBpsController::class, 'destroy'])->name('apibps.destroy');
 
 });
 // Route::post('/apibps/{id}/mapping', [ApiBpsController::class, 'storeMapping'])->name('apibps.mapping.store');
