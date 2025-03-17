@@ -10,6 +10,15 @@
         border-radius: 5px;
     }
 
+    #turvar-options {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ced4da;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+
     #preview-content {
         max-height: 250px;
         overflow-y: auto;
@@ -24,6 +33,17 @@
             opacity: 0.5;
             background: #f0f0f0;
         }
+
+        #targetFields {
+    border: 1px solid #ccc;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+
 </style>
 <div class="container">
     <h2 class="fs-4 mb-4">Nama Data : <strong>{{ $apiBps->nama_data }}</strong></h2>
@@ -65,9 +85,22 @@
                         @endforeach
                     </div>
                 </div>
-
-
                 <div class="mb-3">
+                    <label for="turvar">Nama Tururnan Variabel</label>
+                    <div>
+                        <input type="checkbox" id="select-all-turvar"> <label for="select-all-turvar"><strong>Pilih Semua</strong></label>
+                    </div>
+                <div id="turvar-options">
+                        @foreach($responseData['turvar'] as $tv)
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input turvar-checkbox" name="turvar[]" value="{{ $tv['val'] }}" id="turvar_{{ $tv['val'] }}">
+                                <label class="form-check-label" for="turvar_{{ $tv['val'] }}">{{ $tv['label'] }}</label>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- <div class="mb-3">
                     <label for="turvar">Turunan Variabel</label>
                     <select name="turvar" id="turvar" class="form-select">
                         <option value="0">- Pilih -</option>
@@ -75,7 +108,7 @@
                             <option value="{{ $tv['val'] }}">{{ $tv['label'] }}</option>
                         @endforeach
                     </select>
-                </div>
+                </div> -->
 
                 <div class="mb-3">
                     <label for="tahun">Tahun</label>
@@ -136,8 +169,14 @@
 
 
 <script>
-    document.getElementById('select-all-vervar').addEventListener('change', function() {
+   document.getElementById('select-all-vervar').addEventListener('change', function() {
     let checkboxes = document.querySelectorAll('.vervar-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+    });
+});
+document.getElementById('select-all-turvar').addEventListener('change', function() {
+    let checkboxes = document.querySelectorAll('.turvar-checkbox');
     checkboxes.forEach(checkbox => {
         checkbox.checked = this.checked;
     });
@@ -145,23 +184,26 @@
 
 document.getElementById('btn-preview').addEventListener('click', function() {
     let vervarValues = Array.from(document.querySelectorAll('.vervar-checkbox:checked')).map(cb => cb.value);
+    let turvarValues = Array.from(document.querySelectorAll('.turvar-checkbox:checked')).map(cb => cb.value);
     let variabel = document.getElementById('var').value;
-    let turvar = document.getElementById('turvar').value || "0";
     let tahun = document.getElementById('tahun').value;
     let turtahun = document.getElementById('turtahun').value || "0";
 
-    if (vervarValues.length === 0 || !variabel || !tahun) {
-        alert("Pastikan semua field terisi!");
+    if (!variabel || !tahun || vervarValues.length === 0 || turvarValues.length === 0) {
+        alert("Pastikan semua field terisi dan pilih minimal 1 vervar & turvar!");
         return;
     }
 
     let previewText = "";
     let dataContent = @json($responseData['datacontent']);
 
+    // Kombinasi vervar + turvar
     vervarValues.forEach(vervar => {
-        let generatedId = `${vervar}${variabel}${turvar}${tahun}${turtahun}`;
-        let nilai = dataContent[generatedId] ?? "Data tidak ditemukan";
-        previewText += `ID: ${generatedId}\nNilai: ${nilai}\n\n`;
+        turvarValues.forEach(turvar => {
+            let generatedId = `${vervar}${variabel}${turvar}${tahun}${turtahun}`;
+            let nilai = dataContent[generatedId] ?? "Data tidak ditemukan";
+            previewText += `ID: ${generatedId}\nNilai: ${nilai}\n\n`;
+        });
     });
 
     document.getElementById('preview-content').textContent = previewText;
@@ -173,18 +215,19 @@ document.getElementById('btn-generate').addEventListener('click', function() {
     let tahunData = tahunDropdown.options[tahunDropdown.selectedIndex].getAttribute('data-label');
     
     let vervarValues = Array.from(document.querySelectorAll('.vervar-checkbox:checked')).map(cb => cb.value);
+    let turvarValues = Array.from(document.querySelectorAll('.turvar-checkbox:checked')).map(cb => cb.value);
     let variabel = document.getElementById('var').value;
-    let turvar = document.getElementById('turvar').value || "0"; 
     let tahun = document.getElementById('tahun').value;
     let turtahun = document.getElementById('turtahun').value || "0";
 
-    if (vervarValues.length === 0 || !variabel || !tahun) {
+    if (!variabel || !tahun || vervarValues.length === 0 || turvarValues.length === 0) {
         alert("Pastikan semua field terisi!");
         return;
     }
 
     let dataContent = @json($responseData['datacontent']);
-    let vervarList = @json($responseData['vervar']); // Ambil daftar vervar dari API sumber
+    let vervarList = @json($responseData['vervar']);
+    let turvarList = @json($responseData['turvar']);
 
     let hasilGenerate = {
         "data_id": idData,
@@ -192,30 +235,35 @@ document.getElementById('btn-generate').addEventListener('click', function() {
         "data": []
     };
 
+    // Looping kombinasi vervar + turvar
     vervarValues.forEach(vervar => {
-        let generatedId = `${vervar}${variabel}${turvar}${tahun}${turtahun}`;
-        let nilai = dataContent[generatedId] ?? "Data tidak ditemukan";
+        turvarValues.forEach(turvar => {
+            let generatedId = `${vervar}${variabel}${turvar}${tahun}${turtahun}`;
+            let nilai = dataContent[generatedId] ?? "Data tidak ditemukan";
 
-        // Cari label berdasarkan vervar di API sumber
-        let vervarData = vervarList.find(item => item.val == parseInt(vervar));
-        let labelNama = vervarData ? vervarData.label : `Kode ${vervar}`;
+            let vervarData = vervarList.find(item => item.val == parseInt(vervar));
+            let turvarData = turvarList.find(item => item.val == parseInt(turvar));
 
-        let dataEntry = {
-            "val": parseInt(vervar), // Konversi ke angka
-            "label": labelNama // Ambil label dari API sumber
-        };
+            let labelVervar = vervarData ? vervarData.label : `Kode ${vervar}`;
+            let labelTurvar = turvarData ? turvarData.label : `Kode ${turvar}`;
 
-        // Tambahkan nilai dengan key yang sesuai
-        dataEntry[generatedId] = nilai;
+            let dataEntry = {
+                "vervar_val": parseInt(vervar),
+                "vervar_label": labelVervar,
+                "turvar_val": parseInt(turvar),
+                "turvar_label": labelTurvar,
+            };
+            dataEntry[generatedId] = nilai;
 
-        // Masukkan ke dalam array data
-        hasilGenerate.data.push(dataEntry);
+            hasilGenerate.data.push(dataEntry);
+        });
     });
 
     let jsonString = JSON.stringify(hasilGenerate, null, 4);
     document.getElementById('generate-content').value = jsonString;
     document.getElementById('btn-send').disabled = false;
 });
+
 
 //update atribut
 function updateJsonFields(jsonData) {
