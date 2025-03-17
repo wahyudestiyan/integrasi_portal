@@ -17,6 +17,14 @@
         padding: 10px;
         border-radius: 5px;
     }
+    
+    #turtahun-options {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ced4da;
+        padding: 10px;
+        border-radius: 5px;
+    }
 
 
     #preview-content {
@@ -119,8 +127,23 @@
                         @endforeach
                     </select>
                 </div>
-
+                
                 <div class="mb-3">
+                    <label for="turtahun">Nama Tururnan Tahun</label>
+                    <div>
+                        <input type="checkbox" id="select-all-turtahun"> <label for="select-all-turtahun"><strong>Pilih Semua</strong></label>
+                    </div>
+                <div id="turtahun-options">
+                        @foreach($responseData['turtahun'] as $tt)
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input turtahun-checkbox" name="turtahun[]" value="{{ $tt['val'] }}" id="turtahun_{{ $tt['val'] }}">
+                                <label class="form-check-label" for="turtahun_{{ $tt['val'] }}">{{ $tt['label'] }}</label>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- <div class="mb-3">
                     <label for="turtahun">Turtahun</label>
                     <select name="turtahun" id="turtahun" class="form-select">
                         <option value="0"> - Pilih -</option>
@@ -128,7 +151,7 @@
                             <option value="{{ $tt['val'] }}">{{ $tt['label'] }}</option>
                         @endforeach
                     </select>
-                </div>
+                </div> -->
 
                 <button type="button" id="btn-preview" class="btn btn-primary">Lihat</button>
                 <button type="button" id="btn-generate" class="btn btn-success">Generate</button>
@@ -181,28 +204,36 @@ document.getElementById('select-all-turvar').addEventListener('change', function
         checkbox.checked = this.checked;
     });
 });
+document.getElementById('select-all-turtahun').addEventListener('change', function() {
+    let checkboxes = document.querySelectorAll('.turtahun-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+    });
+});
 
 document.getElementById('btn-preview').addEventListener('click', function() {
     let vervarValues = Array.from(document.querySelectorAll('.vervar-checkbox:checked')).map(cb => cb.value);
     let turvarValues = Array.from(document.querySelectorAll('.turvar-checkbox:checked')).map(cb => cb.value);
+    let turtahunValues = Array.from(document.querySelectorAll('.turtahun-checkbox:checked')).map(cb => cb.value);
     let variabel = document.getElementById('var').value;
     let tahun = document.getElementById('tahun').value;
-    let turtahun = document.getElementById('turtahun').value || "0";
 
-    if (!variabel || !tahun || vervarValues.length === 0 || turvarValues.length === 0) {
-        alert("Pastikan semua field terisi dan pilih minimal 1 vervar & turvar!");
+    if (!variabel || !tahun || vervarValues.length === 0 || turvarValues.length === 0 || turtahunValues.length === 0) {
+        alert("Pastikan semua field terisi dan pilih minimal 1 vervar, turvar & turtahun!");
         return;
     }
 
     let previewText = "";
     let dataContent = @json($responseData['datacontent']);
 
-    // Kombinasi vervar + turvar
+    // Loop vervar + turvar + turtahun
     vervarValues.forEach(vervar => {
         turvarValues.forEach(turvar => {
-            let generatedId = `${vervar}${variabel}${turvar}${tahun}${turtahun}`;
-            let nilai = dataContent[generatedId] ?? "Data tidak ditemukan";
-            previewText += `ID: ${generatedId}\nNilai: ${nilai}\n\n`;
+            turtahunValues.forEach(turtahun => {
+                let generatedId = `${vervar}${variabel}${turvar}${tahun}${turtahun}`;
+                let nilai = dataContent[generatedId] ?? "Data tidak ditemukan";
+                previewText += `ID: ${generatedId}\nNilai: ${nilai}\n\n`;
+            });
         });
     });
 
@@ -216,11 +247,11 @@ document.getElementById('btn-generate').addEventListener('click', function() {
     
     let vervarValues = Array.from(document.querySelectorAll('.vervar-checkbox:checked')).map(cb => cb.value);
     let turvarValues = Array.from(document.querySelectorAll('.turvar-checkbox:checked')).map(cb => cb.value);
+    let turtahunValues = Array.from(document.querySelectorAll('.turtahun-checkbox:checked')).map(cb => cb.value);
     let variabel = document.getElementById('var').value;
     let tahun = document.getElementById('tahun').value;
-    let turtahun = document.getElementById('turtahun').value || "0";
 
-    if (!variabel || !tahun || vervarValues.length === 0 || turvarValues.length === 0) {
+    if (!variabel || !tahun || vervarValues.length === 0 || turvarValues.length === 0 || turtahunValues.length === 0) {
         alert("Pastikan semua field terisi!");
         return;
     }
@@ -228,6 +259,7 @@ document.getElementById('btn-generate').addEventListener('click', function() {
     let dataContent = @json($responseData['datacontent']);
     let vervarList = @json($responseData['vervar']);
     let turvarList = @json($responseData['turvar']);
+    let turtahunList = @json($responseData['turtahun']);
 
     let hasilGenerate = {
         "data_id": idData,
@@ -235,27 +267,33 @@ document.getElementById('btn-generate').addEventListener('click', function() {
         "data": []
     };
 
-    // Looping kombinasi vervar + turvar
+    // Loop vervar + turvar + turtahun
     vervarValues.forEach(vervar => {
         turvarValues.forEach(turvar => {
-            let generatedId = `${vervar}${variabel}${turvar}${tahun}${turtahun}`;
-            let nilai = dataContent[generatedId] ?? "Data tidak ditemukan";
+            turtahunValues.forEach(turtahun => {
+                let generatedId = `${vervar}${variabel}${turvar}${tahun}${turtahun}`;
+                let nilai = dataContent[generatedId] ?? "Data tidak ditemukan";
 
-            let vervarData = vervarList.find(item => item.val == parseInt(vervar));
-            let turvarData = turvarList.find(item => item.val == parseInt(turvar));
+                let vervarData = vervarList.find(item => item.val == parseInt(vervar));
+                let turvarData = turvarList.find(item => item.val == parseInt(turvar));
+                let turtahunData = turtahunList.find(item => item.val == parseInt(turtahun));
 
-            let labelVervar = vervarData ? vervarData.label : `Kode ${vervar}`;
-            let labelTurvar = turvarData ? turvarData.label : `Kode ${turvar}`;
+                let labelVervar = vervarData ? vervarData.label : `Kode ${vervar}`;
+                let labelTurvar = turvarData ? turvarData.label : `Kode ${turvar}`;
+                let labelTurtahun = turtahunData ? turtahunData.label : `Kode ${turtahun}`;
 
-            let dataEntry = {
-                "vervar_val": parseInt(vervar),
-                "vervar_label": labelVervar,
-                "turvar_val": parseInt(turvar),
-                "turvar_label": labelTurvar,
-            };
-            dataEntry[generatedId] = nilai;
+                let dataEntry = {
+                    "vervar_val": parseInt(vervar),
+                    "vervar_label": labelVervar,
+                    "turvar_val": parseInt(turvar),
+                    "turvar_label": labelTurvar,
+                    "turtahun_val": parseInt(turtahun),
+                    "turtahun_label": labelTurtahun
+                };
+                dataEntry[generatedId] = nilai;
 
-            hasilGenerate.data.push(dataEntry);
+                hasilGenerate.data.push(dataEntry);
+            });
         });
     });
 
@@ -263,6 +301,7 @@ document.getElementById('btn-generate').addEventListener('click', function() {
     document.getElementById('generate-content').value = jsonString;
     document.getElementById('btn-send').disabled = false;
 });
+
 
 
 //update atribut
@@ -326,9 +365,9 @@ document.getElementById('targetFields').addEventListener('input', function (even
         let newValue = event.target.value.trim();
 
         // Jika key yang asli adalah angka panjang (10 digit atau lebih)
-        if (/^\d{10,}$/.test(original)) {
+        if (/^\d{5,}$/.test(original)) {
             document.querySelectorAll('.field-input').forEach(otherInput => {
-                if (otherInput.dataset.original === original || /^\d{10,}$/.test(otherInput.dataset.original)) {
+                if (otherInput.dataset.original === original || /^\d{5,}$/.test(otherInput.dataset.original)) {
                     otherInput.value = newValue; // Ubah semua angka panjang yang lain
                 }
             });
