@@ -231,7 +231,7 @@ document.getElementById('btn-preview').addEventListener('click', function() {
         turvarValues.forEach(turvar => {
             turtahunValues.forEach(turtahun => {
                 let generatedId = `${vervar}${variabel}${turvar}${tahun}${turtahun}`;
-                let nilai = dataContent[generatedId] ?? "Data tidak ditemukan";
+                let nilai = dataContent[generatedId] ?? "-";
                 previewText += `ID: ${generatedId}\nNilai: ${nilai}\n\n`;
             });
         });
@@ -272,7 +272,7 @@ document.getElementById('btn-generate').addEventListener('click', function() {
         turvarValues.forEach(turvar => {
             turtahunValues.forEach(turtahun => {
                 let generatedId = `${vervar}${variabel}${turvar}${tahun}${turtahun}`;
-                let nilai = dataContent[generatedId] ?? "Data tidak ditemukan";
+                let nilai = dataContent[generatedId] ?? "-";
 
                 let vervarData = vervarList.find(item => item.val == parseInt(vervar));
                 let turvarData = turvarList.find(item => item.val == parseInt(turvar));
