@@ -7,6 +7,7 @@ use App\Models\InstansiToken;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\InstansiImport;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class VisualisasiController extends Controller
 {
@@ -72,71 +73,21 @@ class VisualisasiController extends Controller
     }
 
     public function index(Request $request)
-    {
-        $instansiTokens = InstansiToken::all();
-        $instansiId = $request->query('instansiId');
-        $data = [];
-    
-        if ($instansiId) {
-            $instansi = InstansiToken::find($instansiId);
-            if ($instansi) {
-                $allData = [];
-                $page = 1;
-    
-                do {
-                    $response = Http::withToken($instansi->bearer_token)
-                        ->get('https://satudata.jatengprov.go.id/v1/data', [
-                            'page' => $page
-                        ]);
-    
-                    if ($response->failed()) {
-                        return redirect()->back()->with('error', 'Gagal mengambil data dari API');
-                    }
-    
-                    $result = $response->json();
-    
-                    if (!isset($result['data'])) {
-                        return redirect()->back()->with('error', 'Format response API tidak sesuai');
-                    }
-    
-                    $allData = array_merge($allData, $result['data']);
-                    $page++;
-                } while (isset($result['next_page_url']) && $result['next_page_url'] != null);
-    
-                // Ambil ID dan Judul dari data yang diterima
-                $data = collect($allData)->map(function ($item) {
-                    return [
-                        'id' => $item['id'],
-                        'judul' => $item['judul']
-                    ];
-                });
-            }
-        }
-    
-        return view('visualisasi.index', compact('instansiTokens', 'data', 'instansiId'));
-    }
-    
-    
-    public function show($instansiId, $dataId)
 {
-    $instansi = InstansiToken::findOrFail($instansiId);
-    $allData = [];
-    $judul = 'Tidak ada Judul'; // Default jika tidak ditemukan
-    $detailData = []; // Variabel untuk menampung detail data yang diambil dari API kedua
-    $page = 1;
-
-    // Ambil semua data judul dari API pertama
     $instansiTokens = InstansiToken::all();
+    $instansiId = $request->query('instansiId');
+    $data = [];
+
     if ($instansiId) {
         $instansi = InstansiToken::find($instansiId);
         if ($instansi) {
             $allData = [];
-            $page = 1; // Mulai dari halaman pertama
+            $page = 1;
 
             do {
                 $response = Http::withToken($instansi->bearer_token)
                     ->get('https://satudata.jatengprov.go.id/v1/data', [
-                        'page' => $page // Kirim parameter halaman
+                        'page' => $page
                     ]);
 
                 if ($response->failed()) {
@@ -145,35 +96,82 @@ class VisualisasiController extends Controller
 
                 $result = $response->json();
 
-                if (!isset($result['data'])) {
+                if (!isset($result['data']) || !isset($result['_meta'])) {
                     return redirect()->back()->with('error', 'Format response API tidak sesuai');
                 }
 
-                // Gabungkan hasil halaman ke dalam array utama
+                // 🔹 Gabungkan data dari API
                 $allData = array_merge($allData, $result['data']);
 
-                // Cek apakah masih ada halaman berikutnya
+                // 🔹 Debugging: Log jumlah data yang diterima di setiap halaman
+                Log::info("Halaman {$page} data API:", ['jumlah_data' => count($result['data'])]);
+
                 $page++;
-            } while (isset($result['next_page_url']) && $result['next_page_url'] != null);
+            } while ($result['_meta']['currentPage'] < $result['_meta']['pageCount']);
 
-            // Ambil hanya ID dan Judul dari API pertama
-            $data = collect($allData)->map(function ($item) {
-                return [
-                    'id' => $item['id'],
-                    'judul' => $item['judul']
-                ];
-            });
-
-            // Ambil judul data berdasarkan dataId
-            $judulData = collect($allData)->firstWhere('id', $dataId);
-            if ($judulData) {
-                $judul = $judulData['judul'] ?? 'Tidak ada Judul';
-            }
+            // 🔹 Ambil ID dan Judul
+            $data = collect($allData)->map(fn($item) => [
+                'id' => $item['id'],
+                'judul' => $item['judul']
+            ]);
         }
     }
 
-    // Ambil detail data dari API kedua berdasarkan dataId
+    return view('visualisasi.index', compact('instansiTokens', 'data', 'instansiId'));
+}
+    
+    public function show($instansiId, $dataId)
+{
+    $instansi = InstansiToken::findOrFail($instansiId);
+    $instansiTokens = InstansiToken::all();
+    $allData = [];
+    $judul = 'Tidak ada Judul'; // Default jika tidak ditemukan
+    $detailData = []; // Variabel untuk menampung detail data yang diambil dari API kedua
+    $page = 1;
+
+    // 🔹 1. Ambil semua data judul dari API pertama (Pastikan paginasi berjalan)
+    if ($instansi) {
+        do {
+            $response = Http::withToken($instansi->bearer_token)
+                ->get('https://satudata.jatengprov.go.id/v1/data', [
+                    'page' => $page
+                ]);
+
+            if ($response->failed()) {
+                return redirect()->back()->with('error', 'Gagal mengambil data dari API');
+            }
+
+            $result = $response->json();
+
+            if (!isset($result['data'])) {
+                return redirect()->back()->with('error', 'Format response API tidak sesuai');
+            }
+
+            // 🔹 2. Gabungkan hasil halaman ke dalam array utama
+            $allData = array_merge($allData, $result['data'] ?? []);
+
+            Log::info("Halaman {$page} data API pertama:", $result['data']);
+
+            $page++;
+        } while (isset($result['next_page_url']) && $result['next_page_url'] != null);
+
+        // 🔹 3. Ambil hanya ID dan Judul dari API pertama
+        $data = collect($allData)->map(fn($item) => [
+            'id' => $item['id'],
+            'judul' => $item['judul']
+        ]);
+
+        // 🔹 4. Ambil judul data berdasarkan dataId
+        $judulData = collect($allData)->firstWhere('id', $dataId);
+        if ($judulData) {
+            $judul = $judulData['judul'] ?? 'Tidak ada Judul';
+        }
+    }
+
+    // 🔹 5. Ambil detail data dari API kedua berdasarkan dataId
     $detailData = [];
+    $page = 1;
+
     do {
         $response = Http::withToken($instansi->bearer_token)
             ->get("https://satudata.jatengprov.go.id/v1/data/{$dataId}", [
@@ -190,15 +188,94 @@ class VisualisasiController extends Controller
             return redirect()->back()->with('error', 'Format response API tidak sesuai');
         }
 
-        $detailData = array_merge($detailData, $result['data']);
-        $currentPage = $result['_meta']['currentPage'];
-        $pageCount = $result['_meta']['pageCount'];
+        // 🔹 6. Pastikan data detail ditambahkan dengan benar
+        $detailData = array_merge($detailData, $result['data'] ?? []);
+        Log::info("Halaman {$page} data API kedua:", $result['data']);
 
         $page++;
-    } while ($currentPage < $pageCount);
+    } while ($result['_meta']['currentPage'] < $result['_meta']['pageCount']);
 
-    // Kirim data ke view
+    // 🔹 7. Kirim data ke view
     return view('visualisasi.detail', compact('instansiTokens', 'data', 'detailData', 'instansi', 'judul'));
+}
+
+public function tabulasi($instansiId, $dataId)
+{
+    $instansi = InstansiToken::findOrFail($instansiId);
+    $instansiTokens = InstansiToken::all();
+    $allData = [];
+    $judul = 'Tidak ada Judul'; // Default jika tidak ditemukan
+    $detailData = []; // Variabel untuk menampung detail data yang diambil dari API kedua
+    $page = 1;
+
+    // 🔹 1. Ambil semua data judul dari API pertama (Pastikan paginasi berjalan)
+    if ($instansi) {
+        do {
+            $response = Http::withToken($instansi->bearer_token)
+                ->get('https://satudata.jatengprov.go.id/v1/data', [
+                    'page' => $page
+                ]);
+
+            if ($response->failed()) {
+                return redirect()->back()->with('error', 'Gagal mengambil data dari API');
+            }
+
+            $result = $response->json();
+
+            if (!isset($result['data'])) {
+                return redirect()->back()->with('error', 'Format response API tidak sesuai');
+            }
+
+            // 🔹 2. Gabungkan hasil halaman ke dalam array utama
+            $allData = array_merge($allData, $result['data'] ?? []);
+
+            Log::info("Halaman {$page} data API pertama:", $result['data']);
+
+            $page++;
+        } while (isset($result['next_page_url']) && $result['next_page_url'] != null);
+
+        // 🔹 3. Ambil hanya ID dan Judul dari API pertama
+        $data = collect($allData)->map(fn($item) => [
+            'id' => $item['id'],
+            'judul' => $item['judul']
+        ]);
+
+        // 🔹 4. Ambil judul data berdasarkan dataId
+        $judulData = collect($allData)->firstWhere('id', $dataId);
+        if ($judulData) {
+            $judul = $judulData['judul'] ?? 'Tidak ada Judul';
+        }
+    }
+
+    // 🔹 5. Ambil detail data dari API kedua berdasarkan dataId
+    $detailData = [];
+    $page = 1;
+
+    do {
+        $response = Http::withToken($instansi->bearer_token)
+            ->get("https://satudata.jatengprov.go.id/v1/data/{$dataId}", [
+                'page' => $page
+            ]);
+
+        if ($response->failed()) {
+            return redirect()->back()->with('error', 'Gagal mengambil data dari API');
+        }
+
+        $result = $response->json();
+
+        if (!isset($result['data']) || !isset($result['_meta'])) {
+            return redirect()->back()->with('error', 'Format response API tidak sesuai');
+        }
+
+        // 🔹 6. Pastikan data detail ditambahkan dengan benar
+        $detailData = array_merge($detailData, $result['data'] ?? []);
+        Log::info("Halaman {$page} data API kedua:", $result['data']);
+
+        $page++;
+    } while ($result['_meta']['currentPage'] < $result['_meta']['pageCount']);
+
+    // 🔹 7. Kirim data ke view
+    return view('visualisasi.tabulasi', compact('instansiTokens', 'data', 'detailData', 'instansi', 'judul'));
 }
 
 

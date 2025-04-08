@@ -113,12 +113,17 @@
                         <ul>
                             <li>
                                 <a href="{{ route('api.index') }}" class="block py-2 px-4 text-gray-200 hover:bg-green-600 hover:text-white rounded-md transition-all">
-                                    Daftar API OPD
+                                    Daftar Data API OPD
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('apibps.index') }}" class="block py-2 px-4 text-gray-200 hover:bg-green-600 hover:text-white rounded-md transition-all">
-                                    Daftar API BPS
+                                    Daftar Data API BPS
+                                </a>
+                            </li>
+                            <li>
+                                <a href="" class="block py-2 px-4 text-gray-200 hover:bg-green-600 hover:text-white rounded-md transition-all">
+                                    Daftar Data Statis BPS
                                 </a>
                             </li>
                         </ul>
@@ -131,25 +136,37 @@
                         <i class="fa fa-chart-bar mr-2"></i> <span>Visualisasi API</span>
                     </a>
                 </li>
+                <li class="mb-2">
+                    <a href="{{ route('monitoring.index') }}" class="block py-2 px-4 rounded-md bg-blue-500 hover:bg-blue-600 transition-all duration-300">
+                        <i class="fa fa-desktop mr-2"></i> <span>Monitoring Judul</span>
+                    </a>
+                </li>
             </ul>
         </nav>
 
         <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
         <!-- Menu Setting & Logout -->
-        <div class="mt-auto">
-            <div class="dropdown">
-                <button class="w-full py-2 px-4 rounded-md bg-gray-700 hover:bg-gray-800 text-white text-left dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fa fa-cog mr-2"></i> <span>Setting</span>
-                </button>
-                <ul class="dropdown-menu w-full" aria-labelledby="dropdownMenuButton">
-                    <li>
-                        <a class="dropdown-item" href="{{ route('visualisasi.create') }}">
-                            <i class="fa fa-key mr-2"></i> Add Token Instansi
-                        </a>
-                    </li>
-                </ul>
+            <div class="mt-auto">
+                <div class="dropdown">
+                    <button class="w-full py-2 px-4 rounded-md bg-gray-700 hover:bg-gray-800 text-white text-left dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-cog mr-2"></i> <span>Setting</span>
+                    </button>
+                    <ul class="dropdown-menu w-full" aria-labelledby="dropdownMenuButton">
+                        <li>
+                            <a class="dropdown-item" href="{{ route('visualisasi.create') }}">
+                                <i class="fa fa-key mr-2"></i> Add Token Instansi
+                            </a>
+                        </li>
+                        <!-- <li>
+                            <a class="dropdown-item" href="">
+                                <i class="fa fa-upload mr-2"></i> Upload Judul (keperluan Monitoring)
+                            </a>
+                        </li> -->
+                    </ul>
+                </div>
             </div>
+
 
             <form method="POST" action="{{ route('logout') }}" class="mt-2">
                 @csrf

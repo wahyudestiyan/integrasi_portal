@@ -1,28 +1,24 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class InstansiToken extends Model
+class DataApi extends Model
 {
     use HasFactory;
 
-    protected $table = 'instansi_tokens';
+    protected $fillable = ['id', 'instansi_token_id','id_api','judul'];
 
-    protected $fillable = [
-        'nama_instansi',
-        'bearer_token',
-    ];
-
-    public function dataApis()
+    public function instansi()
     {
-        return $this->hasMany(DataApi::class);
+        return $this->belongsTo(InstansiToken::class);
     }
 
     public function logs()
     {
         return $this->hasMany(DataApiLog::class);
     }
+    
+
 }

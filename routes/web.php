@@ -6,6 +6,10 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\VisualisasiController;
 use App\Http\Controllers\ApiBpsController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\StatisBpsController;
+use App\Http\Controllers\MonitoringController;
+
+
 
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
@@ -25,14 +29,9 @@ Route::get('/api/create', [ApiController::class, 'create'])->name('api.create');
 Route::post('/api', [ApiController::class, 'store'])->name('api.store');
 Route::post('/api/{api}/send', [ApiController::class, 'send'])->name('api.send');
 Route::delete('apis/{id}', [ApiController::class, 'destroy'])->name('apis.destroy');
-// Route::get('apis/{api}', [ApiController::class, 'show'])->name('apis.show');
 
 Route::post('/api/{apiId}/send-request', [ApiController::class, 'sendRequest'])->name('api.send_request');
-// Route::get('/apis/{apiId}', [ApiController::class, 'showApiDetails'])->name('api.show');
 
-// Route::post('/api/{apiId}/save-response', [ApiController::class, 'saveResponse'])->name('api.save_response');
-
-// Route::post('/api/{api}/send-request', [ApiController::class, 'sendRequestAndSaveResponse'])->name('api.send_request');
 
 Route::get('/api/{apiId}/mapping', [ApiController::class, 'showMappingForm'])->name('api.mapping');
 Route::post('/api/{apiId}/mapping', [ApiController::class, 'saveMapping'])->name('api.mapping.save');
@@ -72,8 +71,6 @@ Route::get('/apibps/download-template', [ApiBpsController::class, 'downloadTempl
 Route::post('/apibps/import', [ApiBpsController::class, 'importTemplate'])->name('apibps.import');
 Route::post('/apibps/{apiId}/send-request', [ApiBpsController::class, 'sendRequestApi'])->name('apibps.send_request');
 
-// Route::get('/apibps/{apiId}/mapping', [ApiBpsController::class, 'showMappingFormBps'])->name('mapping.form');
-// Route::post('/apibps/{apiId}/mapping', [ApiBpsController::class, 'submitMappingFormBps'])->name('mapping.submit');
 
 Route::prefix('apibps')->group(function () {
     Route::get('/mapping/{apibps_id}', [ApiBpsController::class, 'showMappingFormBps'])->name('apibps.mappingForm');
@@ -88,23 +85,28 @@ Route::delete('/del/{id}', [ApiBpsController::class, 'destroy'])->name('apibps.d
 });
 
 
+Route::get('/statisbps', [StatisBpsController::class, 'index'])->name('statisbps.index');
+Route::post('statisbps', [StatisBpsController::class, 'store'])->name('statisbps.store');
+Route::post('statisbps', [StatisBpsController::class, 'create'])->name('statisbps.create');
+Route::post('statisbps/mapping', [StatisBpsController::class, 'processMapping'])->name('statisbps.processMapping');
+Route::delete('/statisbps/{id}', [StatisBpsController::class, 'destroy'])->name('statisbps.destroy');
+Route::get('/statisbps/{id}/lihat-csv', [StatisBpsController::class, 'lihatCsvData']);
+Route::resource('statisbps', \App\Http\Controllers\StatisBPSController::class);
+Route::get('/statisbps/{id}/mapping', [StatisBpsController::class, 'show'])->name('statisbps.mapping');
+Route::post('/statisbps/mapping/process', [StatisBpsController::class, 'processMapping'])->name('statisbps.mapping.process');
 
 
-// Route::post('/apibps/{id}/mapping', [ApiBpsController::class, 'storeMapping'])->name('apibps.mapping.store');
+
+Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
+Route::post('/monitoring/update', [MonitoringController::class, 'update'])->name('monitoring.update');
+Route::get('/monitoring/{instansi}/logs', [MonitoringController::class, 'lihatLog'])->name('monitoring.logs');
+Route::get('/monitoring/logs/{instansiId}', [MonitoringController::class, 'logs'])->name('monitoring.logs');
 
 
 
-    
+
 
 // Route lainnya
 Route::get('/apibps/create', [ApiBpsController::class, 'create'])->name('apibps.create');
 
 
-// Route::get('/api/api-konfirm/{id}', [ApiController::class, 'apiKonfirm'])->name('api.konfirm');
-// Route::post('/api/cek-konfirm/{id}', [ApiController::class, 'cekKonfirm'])->name('cek.konfirm');
-// Route::get('api/tujuan', [ApiController::class, 'tujuan'])->name('api.tujuan');
-
-// Route::get('/api/{apiId}/mapping', [ApiController::class, 'showMapping'])->name('api.mapping');
-// Route::post('/save-mapping', [ApiController::class, 'saveMapping'])->name('api.saveMapping');
-
-// Route::get('/test-api', [App\Http\Controllers\ApiController::class, 'testApi']);

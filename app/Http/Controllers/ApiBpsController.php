@@ -379,7 +379,8 @@ public function konfirmasi($apibpsId)
     public function exportPdfBps()
     {
         $apibps = ApiBps::all(); // Ambil data dari database
-        $pdf = PDF::loadView('ApiBps.pdf', compact('apibps'));
+        $pdf = PDF::loadView('apibps.pdf', compact('apibps'));
+
     
         // Mengatur ukuran kertas menjadi F4 dan orientasi Landscape
         $pdf->setPaper('F4', 'landscape');
