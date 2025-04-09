@@ -29,74 +29,51 @@ class MonitoringController extends Controller
     }
     
 
-    public function update(Request $request)
-    {
-        set_time_limit(0); // biar proses panjang tidak timeout di sisi PHP
-        $instansis = InstansiToken::all();
-    
-        foreach ($instansis as $instansi) {
-            $token = $instansi->bearer_token;
-            $url = 'https://satudata.jatengprov.go.id/v1/data';
-            $allData = [];
-            $page = 1;
-    
-            // Ambil semua judul data dari API per instansi
-            do {
-                $response = Http::withToken($token)->get($url, ['page' => $page]);
-                if ($response->failed()) break;
-    
-                $body = $response->json();
-                $allData = array_merge($allData, $body['data']);
-                $meta = $body['_meta'];
-                $page++;
-            } while ($page <= $meta['pageCount']);
-    
-            // Proses masing-masing judul data
-            foreach ($allData as $apiData) {
-                // Cek apakah sudah ada record di database
-                $existingData = DataApi::where('id_api', $apiData['id'])
-                    ->where('instansi_token_id', $instansi->id)
-                    ->first();
-    
-                // Jika sudah ada dan judul tidak berubah serta tahun_data sudah terisi, skip
-                if ($existingData && 
-                    $existingData->judul === $apiData['judul'] && 
-                    !empty($existingData->tahun_data)) {
-                    continue; // Lewati proses ambil detail untuk data yang sama
-                }
-    
-                // Simpan atau update data judul
-                $dataApi = DataApi::updateOrCreate(
-                    ['id_api' => $apiData['id'], 'instansi_token_id' => $instansi->id],
-                    ['judul' => $apiData['judul']]
-                );
-    
-                // Ambil data detail berdasarkan ID
-                $detailUrl = "https://satudata.jatengprov.go.id/v1/data/{$apiData['id']}";
-                $detailPage = 1;
-                $detailData = [];
-    
-                do {
-                    $detailResponse = Http::withToken($token)->get($detailUrl, ['page' => $detailPage]);
-                    if ($detailResponse->failed()) break;
-    
-                    $detailJson = $detailResponse->json();
-                    $detailData = array_merge($detailData, $detailJson['data']);
-                    $detailPage++;
-                } while (isset($detailJson['_meta']) && $detailPage <= $detailJson['_meta']['pageCount']);
-    
-                // Ambil tahun-tahun unik dari data detail
-                $tahunUnik = collect($detailData)->pluck('tahun_data')->unique()->sort()->toArray();
-    
-                // Simpan ke kolom tahun_data (dipisah koma)
-                $dataApi->tahun_data = implode(',', $tahunUnik);
-                $dataApi->save();
-            }
-        }
-    
-        return redirect()->route('monitoring.index')->with('success', 'Data berhasil disinkronkan.');
+    public function updatePerInstansi($id)
+{
+    set_time_limit(0);
+    $instansi = InstansiToken::findOrFail($id);
+    $token = $instansi->bearer_token;
+    $url = 'https://satudata.jatengprov.go.id/v1/data';
+    $allData = [];
+    $page = 1;
+
+    do {
+        $response = Http::withToken($token)->get($url, ['page' => $page]);
+        if ($response->failed()) break;
+
+        $body = $response->json();
+        $allData = array_merge($allData, $body['data']);
+        $meta = $body['_meta'] ?? ['pageCount' => 1];
+        $page++;
+    } while ($page <= $meta['pageCount']);
+
+    foreach ($allData as $apiData) {
+        $dataApi = DataApi::updateOrCreate(
+            ['id_api' => $apiData['id'], 'instansi_token_id' => $instansi->id],
+            ['judul' => $apiData['judul']]
+        );
+
+        $detailUrl = "https://satudata.jatengprov.go.id/v1/data/{$apiData['id']}";
+        $detailPage = 1;
+        $detailData = [];
+
+        do {
+            $detailResponse = Http::withToken($token)->get($detailUrl, ['page' => $detailPage]);
+            if ($detailResponse->failed()) break;
+
+            $detailJson = $detailResponse->json();
+            $detailData = array_merge($detailData, $detailJson['data']);
+            $detailPage++;
+        } while (isset($detailJson['_meta']) && $detailPage <= $detailJson['_meta']['pageCount']);
+
+        $tahunUnik = collect($detailData)->pluck('tahun_data')->unique()->sort()->toArray();
+        $dataApi->tahun_data = implode(',', $tahunUnik);
+        $dataApi->save();
     }
     
+    return redirect()->back()->with('success', 'update berhasil untuk instansi: ' . $instansi->nama_instansi);
+}
 
 public function lihatLog($instansi_id)
 {

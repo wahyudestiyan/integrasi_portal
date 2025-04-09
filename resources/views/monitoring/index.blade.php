@@ -3,11 +3,7 @@
 @section('content')
 
 <div class="container">
-{{-- Tombol update --}}
-<form action="{{ route('monitoring.update') }}" method="POST" class="mb-4">
-    @csrf
-    <button type="submit">🔄</button>
-</form>
+
 
 <h1 class="mb-2"><strong>MONITORING JUDUL PORTAL DATA</strong></h1>
 
@@ -38,12 +34,36 @@
 {{-- Tabel Data --}}
 @if($selectedInstansi)
     <div class="card mb-4 shadow">
-        <div class="card-header d-flex justify-content-between align-items-center bg-dark text-white">
-            <strong class="text-uppercase">{{ $selectedInstansi->nama_instansi }}</strong>
-            <a href="{{ route('monitoring.logs', $selectedInstansi->id) }}" class="btn btn-info btn-sm">
-                🔍 Lihat Log
-            </a>
-        </div>
+    <div class="card-header d-flex justify-content-between align-items-center bg-dark text-white">
+    <strong class="text-uppercase">{{ $selectedInstansi->nama_instansi }}</strong>
+    <div class="d-flex gap-2">
+        <a href="{{ route('monitoring.logs', $selectedInstansi->id) }}" class="btn btn-info btn-sm">
+            🔍 Lihat Log dan Update
+        </a>
+        <form action="{{ route('monitoring.sync.instansi', $selectedInstansi->id) }}" method="POST" id="form-update">
+            @csrf
+            <button type="submit" class="btn btn-warning btn-sm" id="btn-update">
+                🔄
+            </button>
+        </form>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const form = document.getElementById("form-update");
+                const button = document.getElementById("btn-update");
+
+                form.addEventListener("submit", function (e) {
+                    e.preventDefault(); // Cegah submit langsung
+                    button.disabled = true;
+                    button.innerText = "⏳ Memproses...";
+                    form.submit(); // Submit form setelah tombol di-disable
+                });
+            });
+        </script>
+
+    </div>
+</div>
+
 
         {{-- Form pencarian judul --}}
         <form method="GET" action="{{ route('monitoring.index') }}" class="p-3">
