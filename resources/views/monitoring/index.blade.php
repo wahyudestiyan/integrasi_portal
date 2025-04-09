@@ -37,9 +37,13 @@
     <div class="card-header d-flex justify-content-between align-items-center bg-dark text-white">
     <strong class="text-uppercase">{{ $selectedInstansi->nama_instansi }}</strong>
     <div class="d-flex gap-2">
-        <a href="{{ route('monitoring.logs', $selectedInstansi->id) }}" class="btn btn-info btn-sm">
-            🔍 Lihat Log dan Update
-        </a>
+    <form action="{{ route('monitoring.logs', $selectedInstansi->id) }}" method="POST" style="display:inline;">
+            @csrf
+            <button type="submit" class="btn btn-info btn-sm">
+                🔍 Lihat Log dan Update
+            </button>
+        </form>
+
         <form action="{{ route('monitoring.sync.instansi', $selectedInstansi->id) }}" method="POST" id="form-update">
             @csrf
             <button type="submit" class="btn btn-warning btn-sm" id="btn-update">

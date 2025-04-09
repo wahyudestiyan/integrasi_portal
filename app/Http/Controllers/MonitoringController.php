@@ -153,9 +153,10 @@ public function lihatLog($instansi_id)
     $logList = DataApiLog::with('dataApi')
         ->where('instansi_token_id', $instansi->id)
         ->orderByDesc('created_at')
-        ->get();
+        ->paginate(10); // 10 log per halaman  
 
-    return view('monitoring.logs', compact('logList', 'instansi'));
+        return view('monitoring.logs', ['logs' => $logList, 'instansi' => $instansi]);
+
 }
 
 
