@@ -37,7 +37,7 @@
     <div class="card-header d-flex justify-content-between align-items-center bg-dark text-white">
     <strong class="text-uppercase">{{ $selectedInstansi->nama_instansi }}</strong>
     <div class="d-flex gap-2">
-    <form action="{{ route('monitoring.logs', $selectedInstansi->id) }}" method="POST" style="display:inline;">
+    <form action="{{ route('monitoring.lihatlogs', $selectedInstansi->id) }}" method="POST" style="display:inline;">
             @csrf
             <button type="submit" class="btn btn-info btn-sm">
                 🔍 Lihat Log dan Update

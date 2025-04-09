@@ -98,9 +98,7 @@ Route::post('/statisbps/mapping/process', [StatisBpsController::class, 'processM
 
 
 Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
-Route::post('/monitoring/update', [MonitoringController::class, 'update'])->name('monitoring.update');
-// Route::get('/monitoring/{instansi}/logs', [MonitoringController::class, 'lihatLog'])->name('monitoring.logs');
-Route::post('/monitoring/logs/{id}', [MonitoringController::class, 'lihatLog'])->name('monitoring.logs');
+Route::post('/monitoring/{instansi}/logs', [MonitoringController::class, 'lihatLog'])->name('monitoring.lihatlogs');
 Route::get('/monitoring/logs/{instansiId}', [MonitoringController::class, 'logs'])->name('monitoring.logs');
 Route::post('/monitoring/sync-instansi/{id}', [MonitoringController::class, 'updatePerInstansi'])->name('monitoring.sync.instansi');
 
