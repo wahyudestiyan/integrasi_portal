@@ -8,7 +8,7 @@ class DataApi extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['id', 'instansi_token_id','id_api','judul'];
+    protected $fillable = ['id', 'instansi_token_id','id_api','judul','tahun_data'];
 
     public function instansi()
     {
