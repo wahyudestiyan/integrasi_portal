@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\DataApiImport;
 use Illuminate\Support\Facades\Http;
 use App\Models\InstansiToken;
 use App\Models\DataApi;
@@ -179,5 +181,20 @@ public function logs(Request $request, $instansiId)
     return view('monitoring.logs', compact('instansi', 'logs'));
 }
 
+public function create()
+{
+    return view('monitoring.create');
+}
+
+public function importExcel(Request $request)
+{
+    $request->validate([
+        'file' => 'required|file|mimes:xlsx,xls'
+    ]);
+
+    Excel::import(new DataApiImport, $request->file('file'));
+
+    return redirect()->back()->with('success', 'Data berhasil diimport dari file Excel.');
+}
 
 }

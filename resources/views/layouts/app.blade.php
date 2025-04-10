@@ -158,6 +158,11 @@
                                 <i class="fa fa-key mr-2"></i> Add Token Instansi
                             </a>
                         </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('monitoring.create') }}">
+                                <i class="fa fa-book mr-2"></i> Add Data Judul Besar
+                            </a>
+                        </li>
                         <!-- <li>
                             <a class="dropdown-item" href="">
                                 <i class="fa fa-upload mr-2"></i> Upload Judul (keperluan Monitoring)

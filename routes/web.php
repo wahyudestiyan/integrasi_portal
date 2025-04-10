@@ -101,6 +101,8 @@ Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitor
 Route::post('/monitoring/{instansi}/logs', [MonitoringController::class, 'lihatLog'])->name('monitoring.lihatlogs');
 Route::get('/monitoring/logs/{instansiId}', [MonitoringController::class, 'logs'])->name('monitoring.logs');
 Route::post('/monitoring/sync-instansi/{id}', [MonitoringController::class, 'updatePerInstansi'])->name('monitoring.sync.instansi');
+Route::get('/monitoring/create', [MonitoringController::class, 'create'])->name('monitoring.create');
+Route::post('/monitoring/import-excel', [MonitoringController::class, 'importExcel'])->name('monitoring.import.excel');
 
 
 
