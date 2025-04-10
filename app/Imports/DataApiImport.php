@@ -8,19 +8,13 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class DataApiImport implements ToModel, WithHeadingRow
 {
-    /**
-     * Membuat atau mengupdate data dari setiap baris Excel
-     */
     public function model(array $row)
     {
-        return DataApi::updateOrCreate(
+        // Periksa apakah id_api sudah ada di database
+        return DataApi::firstOrCreate(
+            ['id_api' => $row['id_api']], // Cari berdasarkan id_api
             [
-                // Kunci unik untuk deteksi duplikasi
-                'id_api' => $row['id_api'],
                 'instansi_token_id' => $row['instansi_token_id'],
-            ],
-            [
-                // Kolom yang akan disimpan/diupdate
                 'judul' => $row['judul'],
                 'tahun_data' => $row['tahun_data'],
             ]
