@@ -10,12 +10,10 @@ class WebhookController extends Controller
 {
     public function handle(Request $request)
     {
-        $secret = 'portal-data-bridging@2025';
-        $signature  = $request->header('X-Hub-Signature-256');
-        $input = $request->getContent();
+        $hookId = '540407580';
+        $headerHookId  = $request->header('X-GitHub-Hook-ID');
 
-        $hash = 'sha256=' . hash_hmac('sha256', $input, $secret);
-        if (!hash_equals($hash, $signature)) {
+        if ($hookId !== $headerHookId) {
             Log::warning("Webhook: Token mismatch");
             return response()->json(['message' => 'Unauthorized'], 403);
         }
