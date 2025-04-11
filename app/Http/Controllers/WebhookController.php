@@ -10,18 +10,18 @@ class WebhookController extends Controller
 {
     public function handle(Request $request)
     {
-        // $hookId = '540407580';
-        // $headerHookId  = $request->header('X-GitHub-Hook-ID');
+        $hookId = '540407580';
+        $headerHookId  = $request->header('X-GitHub-Hook-ID');
 
-        // if ($hookId !== $headerHookId) {
-        //     Log::warning("Webhook: Token mismatch");
-        //     return response()->json(['message' => 'Unauthorized'], 403);
-        // }
+        if ($hookId !== $headerHookId) {
+            Log::warning("Webhook: Token mismatch");
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
 
-        // $payload = $request->all();
+        $payload = $request->all();
 
         // Cek jika push ke branch 'main'
-        // if (($payload['ref'] ?? '') === 'refs/heads/main') {
+        if (($payload['ref'] ?? '') === 'refs/heads/main') {
             Log::info("Webhook: Triggered by push to main");
 
             $process = Process::fromShellCommandline('sudo /home/portal-data-bridging/gitpull.sh');
@@ -38,8 +38,8 @@ class WebhookController extends Controller
                 'output' => $output,
                 'error_output' => $errorOutput
             ]);
-        // }
+        }
 
-        // return response()->json(['message' => 'Ignored'], 200);
+        return response()->json(['message' => 'Ignored'], 200);
     }
 }
