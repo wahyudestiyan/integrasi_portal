@@ -4,7 +4,7 @@
 <div class="container vh-100 d-flex flex-column align-items-center justify-content-center">
     <!-- Judul Aplikasi -->
     <h2 class="mb-4 text-white" style="font-weight: bold; background-color: #1F2937; padding: 10px 20px; border-radius: 8px;">
-        PORTAL DATA BRIDGING
+        PORTAL-DATA-BRIDGING
     </h2>
 
     <div class="row justify-content-center">
