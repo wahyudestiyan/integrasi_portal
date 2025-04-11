@@ -144,31 +144,11 @@
 
 <div class="mt-10 max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
     <h2 class="text-2xl font-semibold text-blue-900 mb-4 flex items-center gap-2">
-        <svg class="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-             <path stroke-linecap="round" stroke-linejoin="round"
-                   d="M12 8c1.657 0 3-1.343 3-3S13.657 2 12 2 9 3.343 9 5s1.343 3 3 3zM6 22v-2a4 4 0 014-4h4a4 4 0 014 4v2M4 15h16"></path>
-        </svg>
         Jumlah Judul Berdasarkan Tahun Data
     </h2>
 
-    @php
-        $tahunJumlah = [];
-        foreach($tahunCount as $tahunGabungan => $jumlah) {
-            $tahunArray = explode(',', $tahunGabungan);
-            foreach ($tahunArray as $tahun) {
-                $tahun = trim($tahun);
-                if (!isset($tahunJumlah[$tahun])) {
-                    $tahunJumlah[$tahun] = 0;
-                }
-                $tahunJumlah[$tahun] += $jumlah;
-            }
-        }
-        ksort($tahunJumlah); // Urut berdasarkan tahun
-    @endphp
-
     <ul class="space-y-2 mt-4">
-        @foreach($tahunJumlah as $tahun => $jumlah)
+        @foreach($tahunJumlahFiltered as $tahun => $jumlah)
             <li class="flex items-center justify-between bg-gray-100 hover:bg-blue-50 transition-colors p-3 rounded-md shadow-sm">
                 <span class="text-blue-800 font-medium">Tahun {{ $tahun }}</span>
                 <span class="text-gray-700">{{ $jumlah }} judul</span>
