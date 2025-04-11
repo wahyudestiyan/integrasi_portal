@@ -10,13 +10,13 @@ class WebhookController extends Controller
 {
     public function handle(Request $request)
     {
-        $hookId = '540407580';
-        $headerHookId  = $request->header('X-GitHub-Hook-ID');
+        // $hookId = '540407580';
+        // $headerHookId  = $request->header('X-GitHub-Hook-ID');
 
-        if ($hookId !== $headerHookId) {
-            Log::warning("Webhook: Token mismatch");
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        // if ($hookId !== $headerHookId) {
+        //     Log::warning("Webhook: Token mismatch");
+        //     return response()->json(['message' => 'Unauthorized'], 403);
+        // }
 
         $payload = $request->all();
 
