@@ -188,9 +188,6 @@
     </div>
 </div>
 
-
-
-
 <script>
    document.getElementById('select-all-vervar').addEventListener('change', function() {
     let checkboxes = document.querySelectorAll('.vervar-checkbox');
@@ -406,29 +403,49 @@ document.getElementById('btn-update-json').addEventListener('click', function ()
     let newJsonData = JSON.parse(document.getElementById('generate-content').value);
     let updatedKeys = {};
 
-    // Simpan perubahan nama elemen
+    // Ambil urutan terbaru field dari DOM (hasil drag & drop)
+    let updatedOrder = Array.from(document.querySelectorAll('#targetFields li'))
+    .map(li => {
+        let input = li.querySelector('.field-input');
+        return input ? input.value.trim() : '';
+    });
+
+    // Mapping nama field lama ke yang baru
     document.querySelectorAll('#targetFields .field-input').forEach(input => {
         let originalField = input.dataset.original;
         let newField = input.value.trim();
-
         if (newField) {
             updatedKeys[originalField] = newField;
         }
     });
 
-    // Perbarui JSON dengan nama baru dan hapus key yang dihapus
+    // Buat ulang data JSON berdasarkan urutan field baru
     newJsonData.data = newJsonData.data.map(item => {
-        let newItem = {};
+    let newItem = {};
 
-        Object.keys(item).forEach(key => {
-            if (!deletedFields.has(key)) { // Hanya tambahkan jika tidak dihapus
-                let newKey = updatedKeys[key] || key;
-                newItem[newKey] = item[key];
-            }
-        });
+    // Tambahkan field berdasarkan urutan baru (drag n drop)
+    updatedOrder.forEach(key => {
+        let originalKey = Object.keys(updatedKeys).find(k => updatedKeys[k] === key);
+        let actualKey = originalKey || key;
 
-        return newItem;
+        if (item.hasOwnProperty(actualKey) && !deletedFields.has(actualKey)) {
+            newItem[key] = item[actualKey];
+        }
     });
+
+    // Tambahkan sisa field yang belum disentuh (tidak dihapus dan belum ditambahkan)
+    Object.keys(item).forEach(key => {
+        if (!deletedFields.has(key)) {
+            let renamedKey = updatedKeys[key] || key;
+            if (!newItem.hasOwnProperty(renamedKey)) {
+                newItem[renamedKey] = item[key];
+            }
+        }
+    });
+
+    return newItem;
+});
+
 
     document.getElementById('generate-content').value = JSON.stringify(newJsonData, null, 4);
     alert("JSON berhasil diperbarui!");
