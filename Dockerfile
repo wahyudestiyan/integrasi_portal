@@ -1,19 +1,16 @@
 FROM dunglas/frankenphp
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    zip \
+# Install dependensi dasar + ekstensi MySQL
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     git \
-    unzip && \
-    docker-php-ext-configure gd --with-freetype --with-jpeg && \
-    docker-php-ext-install gd pdo pdo_mysql zip
+    unzip \
+    zip \
+    && docker-php-ext-install pdo pdo_mysql \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Composer
+# Optional: install Composer jika belum ada
 RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer
 
-# Jalankan aplikasi menggunakan PHP built-in web server (menghindari redirect HTTPS bawaan frankenphp)
 CMD ["php", "-S", "0.0.0.0:80", "-t", "public"]
