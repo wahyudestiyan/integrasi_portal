@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: frankenphp_portal_data_bridging
     ports:
-      - "8082:80"
+      - "8080:80"
     volumes:
       - /home/portal-data-bridging/public_html:/app
     environment:
