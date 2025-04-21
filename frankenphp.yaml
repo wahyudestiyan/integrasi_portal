@@ -1,0 +1,5 @@
+frankenphp:
+  workers: 4
+  bootstrap: public/index.php
+  http:
+    redirect_to_https: false

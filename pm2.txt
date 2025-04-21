@@ -1,0 +1,1 @@
+pm2 start ./start_frankenphp.sh --name franken-php-integrasi-portal
