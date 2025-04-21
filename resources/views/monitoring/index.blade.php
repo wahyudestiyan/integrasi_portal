@@ -51,6 +51,13 @@
             </button>
         </form>
 
+        <form action="{{ route('monitoring.exportExcel', $selectedInstansi->id) }}" method="GET" style="display:inline;">
+    <button type="submit" class="btn btn-success btn-sm">
+                📥 Download Excel
+            </button>
+        </form>
+
+
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 const form = document.getElementById("form-update");

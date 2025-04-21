@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\InstansiToken;
 use App\Models\DataApi;
 use App\Models\DataApiLog;
+use App\Exports\DataMonitoringExport;
 
 class MonitoringController extends Controller
 {
@@ -195,6 +196,11 @@ public function importExcel(Request $request)
     Excel::import(new DataApiImport, $request->file('file'));
 
     return redirect()->back()->with('success', 'Data berhasil diimport dari file Excel.');
+}
+
+public function exportExcel($instansiId)
+{
+    return Excel::download(new DataMonitoringExport($instansiId), 'data-monitoring.xlsx');
 }
 
 }
