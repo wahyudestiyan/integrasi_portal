@@ -8,6 +8,7 @@ use App\Http\Controllers\ApiBpsController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StatisBpsController;
 use App\Http\Controllers\MonitoringController;
+use App\Http\Controllers\PemeriksaanDataController;
 
 
 
@@ -103,7 +104,17 @@ Route::get('/monitoring/logs/{instansiId}', [MonitoringController::class, 'logs'
 Route::post('/monitoring/sync-instansi/{id}', [MonitoringController::class, 'updatePerInstansi'])->name('monitoring.sync.instansi');
 Route::get('/monitoring/create', [MonitoringController::class, 'create'])->name('monitoring.create');
 Route::post('/monitoring/import-excel', [MonitoringController::class, 'importExcel'])->name('monitoring.import.excel');
+Route::get('/monitoring/exportExcel/{instansiId}', [MonitoringController::class, 'exportExcel'])->name('monitoring.exportExcel');
 
+
+
+
+Route::get('/pemeriksaan/upload', [PemeriksaanDataController::class, 'create'])->name('uploaddata.create');
+Route::get('/pemeriksaan/unduh-template', [PemeriksaanDataController::class, 'downloadTemplate'])->name('pemeriksaan.unduh-template');
+Route::post('/pemeriksaan/import-excel', [PemeriksaanDataController::class, 'importExcel'])->name('pemeriksaan.import-excel');
+Route::get('/pemeriksaan', [PemeriksaanDataController::class, 'index'])->name('pemeriksaan.index');
+Route::get('/pemeriksaan/periksa/{instansi}/{tahun}', [PemeriksaanDataController::class, 'periksa'])->name('pemeriksaan.periksa');
+Route::get('/pemeriksaan/lihat-belum/{instansi}/{tahun}', [PemeriksaanDataController::class, 'lihatBelumLengkap'])->name('pemeriksaan.lihat_belum_lengkap');
 
 
 
