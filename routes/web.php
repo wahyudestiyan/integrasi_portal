@@ -113,8 +113,11 @@ Route::get('/pemeriksaan/upload', [PemeriksaanDataController::class, 'create'])-
 Route::get('/pemeriksaan/unduh-template', [PemeriksaanDataController::class, 'downloadTemplate'])->name('pemeriksaan.unduh-template');
 Route::post('/pemeriksaan/import-excel', [PemeriksaanDataController::class, 'importExcel'])->name('pemeriksaan.import-excel');
 Route::get('/pemeriksaan', [PemeriksaanDataController::class, 'index'])->name('pemeriksaan.index');
-Route::get('/pemeriksaan/periksa/{instansi}/{tahun}', [PemeriksaanDataController::class, 'periksa'])->name('pemeriksaan.periksa');
+Route::post('/pemeriksaan/periksa/{instansi}/{tahun}', [PemeriksaanDataController::class, 'periksa'])->name('pemeriksaan.periksa');
 Route::get('/pemeriksaan/lihat-belum/{instansi}/{tahun}', [PemeriksaanDataController::class, 'lihatBelumLengkap'])->name('pemeriksaan.lihat_belum_lengkap');
+Route::get('/pemeriksaan/lihatjudul/{instansi}/{tahun}', [PemeriksaanDataController::class, 'lihatJudul'])->name('pemeriksaan.lihatJudul');
+Route::get('pemeriksaan/export', [PemeriksaanDataController::class, 'export'])->name('pemeriksaan.export');
+
 
 
 

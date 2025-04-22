@@ -123,11 +123,11 @@
                                     Daftar Data API BPS
                                 </a>
                             </li>
-                            <li>
+                            <!-- <li>
                                 <a href="" class="block py-2 px-4 text-gray-200 hover:bg-green-600 hover:text-white rounded-md transition-all">
                                     Daftar Data Statis BPS
                                 </a>
-                            </li>
+                            </li> -->
                         </ul>
                     </div>
                 </li>
@@ -143,6 +143,11 @@
                         <i class="fa fa-desktop mr-2"></i> <span>Monitoring Judul</span>
                     </a>
                 </li>
+                <li class="mb-2">
+                    <a href="{{ route('pemeriksaan.index') }}" class="block py-2 px-4 rounded-md bg-blue-500 hover:bg-blue-600 transition-all duration-300 text-white">
+                        <i class="fa fa-clipboard-check mr-2 text-white"></i> <span>Pemeriksaan Data</span>
+                    </a>
+    </li>
             </ul>
         </nav>
 
@@ -165,6 +170,12 @@
                                 <i class="fa fa-book mr-2"></i> Add Data Judul Besar
                             </a>
                         </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('uploaddata.create') }}">
+                                <i class="fa fa-book mr-2"></i> Data Priotas SK Sekda
+                            </a>
+                        </li>
+                        
                         <!-- <li>
                             <a class="dropdown-item" href="">
                                 <i class="fa fa-upload mr-2"></i> Upload Judul (keperluan Monitoring)

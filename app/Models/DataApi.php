@@ -19,6 +19,8 @@ class DataApi extends Model
     {
         return $this->hasMany(DataApiLog::class);
     }
+
+    
     
 
 }

@@ -25,4 +25,20 @@ class InstansiToken extends Model
     {
         return $this->hasMany(DataApiLog::class);
     }
+
+    public function dataPrioritasSk()
+    {
+        return $this->hasMany(DataPrioritasSkSekda::class, 'instansi_token_id');
+    }
+
+    public function dataBelumTerisi()
+    {
+        return $this->hasMany(DataPrioritasBelumTerisi::class, 'instansi_token_id');
+    }
+
+    public function rekapitulasi()
+{
+    return $this->hasMany(RekapitulasiPemeriksaan::class, 'instansi_token_id');
+}
+
 }
