@@ -27,7 +27,7 @@ class WebhookController extends Controller
             $process = Process::fromShellCommandline('sudo /home/portal-data-bridging/gitpull.sh');
             $process->run();
 
-            // Process::fromShellCommandline('sudo pm2 restart 0 > /dev/null 2>&1 &')->start();
+            Process::fromShellCommandline('sudo pm2 restart 0 > /dev/null 2>&1 &')->start();
             Process::fromShellCommandline('sudo pm2 restart 1 > /dev/null 2>&1 &')->start();
 
             $output = $process->getOutput(); // stdout
