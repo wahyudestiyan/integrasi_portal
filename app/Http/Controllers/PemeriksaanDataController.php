@@ -107,83 +107,94 @@ class PemeriksaanDataController extends Controller
         ]);
     }
 
-public function periksa($instansiId, Request $request)
-{
-    $tahun = $request->tahun;
-    $instansi = InstansiToken::findOrFail($instansiId);
-
-    $dataSkSekda = DataPrioritasSkSekda::where('instansi_token_id', $instansiId)
-        ->where('tahun', $tahun)
-        ->get();
-
-    $apiData = $this->getDataFromApi($instansi, $tahun);
-
-    $jumlahTerdaftar = 0;
-    $jumlahDataTerisi = 0;
-
-    // Bersihkan data belum terisi sebelumnya
-    DataPrioritasBelumTerisi::where('instansi_token_id', $instansiId)
-        ->where('tahun', $tahun)
-        ->delete();
-
-    foreach ($dataSkSekda as $data) {
-        $matched = null;
-
-        // 🔍 1. Coba cocokkan berdasarkan ID jika tersedia
-        if ($data->id_data_portal) {
-            $matched = collect($apiData)->firstWhere('id', $data->id_data_portal);
-        }
-
-        // 🔍 2. Fallback: cocokkan berdasarkan judul (slug)
-        if (!$matched) {
-            $matched = collect($apiData)->first(function ($item) use ($data) {
-                return Str::slug($item['judul']) === Str::slug($data->judul_data);
-            });
-        }
-
-        // 🔍 3. Proses jika data ditemukan di API
-        if ($matched) {
-            $jumlahTerdaftar++;
-
-            $detail = $this->getDataDetailFromApi($matched['id'], $instansi);
-            $detailTahunIni = collect($detail)->where('tahun_data', (int) $tahun);
-
-            if ($detailTahunIni->isNotEmpty()) {
-                $jumlahDataTerisi++;
+    public function periksa($instansiId, Request $request)
+    {
+        $tahun = $request->tahun;
+        $instansi = InstansiToken::findOrFail($instansiId);
+    
+        $dataSkSekda = DataPrioritasSkSekda::where('instansi_token_id', $instansiId)
+            ->where('tahun', $tahun)
+            ->get();
+    
+        $jumlahSkSekda = $dataSkSekda->count();
+        $apiData = $this->getDataFromApi($instansi, $tahun);
+    
+        $jumlahTerdaftar = 0;
+        $jumlahDataTerisi = 0;
+    
+        // Hapus data belum terisi sebelumnya
+        DataPrioritasBelumTerisi::where('instansi_token_id', $instansiId)
+            ->where('tahun', $tahun)
+            ->delete();
+    
+        foreach ($dataSkSekda as $data) {
+            $matched = null;
+    
+            // 1. Cocokkan berdasarkan ID jika ada
+            if ($data->id_data_portal) {
+                $matched = collect($apiData)->firstWhere('id', $data->id_data_portal);
+            }
+    
+            // 2. Jika tidak ada, cocokkan berdasarkan judul
+            if (!$matched) {
+                $matched = collect($apiData)->first(function ($item) use ($data) {
+                    return Str::slug($item['judul']) === Str::slug($data->judul_data);
+                });
+            }
+    
+            // 3. Jika ditemukan
+            if ($matched) {
+                $jumlahTerdaftar++;
+    
+                $detail = $this->getDataDetailFromApi($matched['id'], $instansi);
+                $detailTahunIni = collect($detail)->where('tahun_data', (int) $tahun);
+    
+                if ($detailTahunIni->isNotEmpty()) {
+                    $jumlahDataTerisi++;
+                } else {
+                    DataPrioritasBelumTerisi::create([
+                        'instansi_token_id' => $instansiId,
+                        'judul_data' => $data->judul_data,
+                        'tahun' => $tahun,
+                        'keterangan' => 'Judul ditemukan, namun belum ada isian untuk tahun ' . $tahun,
+                    ]);
+                }
             } else {
                 DataPrioritasBelumTerisi::create([
                     'instansi_token_id' => $instansiId,
                     'judul_data' => $data->judul_data,
                     'tahun' => $tahun,
-                    'keterangan' => 'Judul ditemukan, namun belum ada isian untuk tahun ' . $tahun,
+                    'keterangan' => 'Judul tidak ditemukan di Portal Data',
                 ]);
             }
-        } else {
-            // ❌ Tidak ditemukan sama sekali
-            DataPrioritasBelumTerisi::create([
-                'instansi_token_id' => $instansiId,
-                'judul_data' => $data->judul_data,
-                'tahun' => $tahun,
-                'keterangan' => 'Judul tidak ditemukan di Portal Data',
-            ]);
         }
+    
+        // 🔍 Tentukan status
+        if ($jumlahSkSekda === 0) {
+            // Tidak ada SK Sekda
+            $status = $jumlahDataTerisi === $jumlahTerdaftar ? 'Lengkap' : 'Belum Lengkap';
+        } else {
+            // Ada SK Sekda
+            $status = (
+                $jumlahSkSekda === $jumlahTerdaftar &&
+                $jumlahTerdaftar === $jumlahDataTerisi
+            ) ? 'Lengkap' : 'Belum Lengkap';
+        }
+    
+        // 🔄 Simpan rekapitulasi
+        RekapitulasiPemeriksaan::updateOrCreate(
+            ['instansi_token_id' => $instansiId, 'tahun' => $tahun],
+            [
+                'jumlah_sk_sekda' => $jumlahSkSekda,
+                'jumlah_terdaftar_di_portal' => $jumlahTerdaftar,
+                'jumlah_data_terisi' => $jumlahDataTerisi,
+                'status' => $status,
+            ]
+        );
+    
+        return redirect()->route('pemeriksaan.index', ['tahun' => $tahun])
+            ->with('success', 'Pemeriksaan data berhasil disimpan untuk tahun ' . $tahun);
     }
-
-    // 🔄 Simpan hasil rekapitulasi
-    RekapitulasiPemeriksaan::updateOrCreate(
-        ['instansi_token_id' => $instansiId, 'tahun' => $tahun],
-        [
-            'jumlah_sk_sekda' => $dataSkSekda->count(),
-            'jumlah_terdaftar_di_portal' => $jumlahTerdaftar,
-            'jumlah_data_terisi' => $jumlahDataTerisi,
-            'status' => $jumlahDataTerisi === $dataSkSekda->count() ? 'Lengkap' : 'Belum Lengkap',
-        ]
-    );
-
-    return redirect()->route('pemeriksaan.index', ['tahun' => $tahun])
-        ->with('success', 'Pemeriksaan data berhasil disimpan untuk tahun ' . $tahun);
-}
-
     
 
     private function getDataFromApi($instansi, $tahun)
