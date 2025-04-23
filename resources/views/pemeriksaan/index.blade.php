@@ -40,7 +40,7 @@
                     <th>No</th>
                     <th>Instansi</th>
                     <th>Data Prioritas SK Sekda</th>
-                    <th>Jumlah Data Prioritas</th>
+                    <th>Judul Data Prioritas Terdaftar</th>
                     <th>Data Prioritas Masuk</th>
                     <th>Status</th>
                     <th>Aksi</th>

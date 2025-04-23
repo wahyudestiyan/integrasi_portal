@@ -35,7 +35,7 @@ class RekapitulasiExport implements FromCollection, WithHeadings, WithMapping, S
             'No',
             'Instansi',
             'Data Prioritas SK Sekda',
-            'Jumlah Data Prioritas',
+            'Judul Data Prioritas Terdaftar',
             'Data Prioritas Masuk',
             'Status',
         ];
