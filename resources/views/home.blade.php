@@ -142,19 +142,20 @@
     <canvas id="apiBpsChart"></canvas>
 </div>
 
-<div class="mt-10 max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
+<!-- Data List Section - Adjusted to match chart width -->
+<div class="mt-10 max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
     <h2 class="text-2xl font-semibold text-blue-900 mb-4 flex items-center gap-2">
-        Jumlah Judul Berdasarkan Tahun Data
+        Jumlah Data Masuk Portal Berdasarkan Tahun Data
     </h2>
 
-    <ul class="space-y-2 mt-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         @foreach($tahunJumlahFiltered as $tahun => $jumlah)
-            <li class="flex items-center justify-between bg-gray-100 hover:bg-blue-50 transition-colors p-3 rounded-md shadow-sm">
+            <div class="flex items-center justify-between bg-gray-100 hover:bg-blue-50 transition-colors p-3 rounded-md shadow-sm">
                 <span class="text-blue-800 font-medium">Tahun {{ $tahun }}</span>
                 <span class="text-gray-700">{{ $jumlah }} judul</span>
-            </li>
+            </div>
         @endforeach
-    </ul>
+    </div>
 </div>
 
 
