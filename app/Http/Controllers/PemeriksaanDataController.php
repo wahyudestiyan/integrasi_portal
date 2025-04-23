@@ -52,60 +52,59 @@ class PemeriksaanDataController extends Controller
      * Menampilkan halaman rekap pemeriksaan (dengan filter tahun)
      */
     public function index(Request $request)
-    {
-        $tahunList = DataPrioritasSkSekda::select('tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun');
-        // Mengambil tahun dari request
-            $tahun = $request->get('tahun', date('Y')); // Menambahkan fallback ke tahun saat ini jika tahun kosong
+{
+    $tahunList = DataPrioritasSkSekda::select('tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun');
+    $tahun = $request->get('tahun', date('Y')); // fallback ke tahun sekarang
 
+    if (!$tahun) {
+        $rekapitulasi = collect(); // tidak tampilkan data jika tidak ada tahun
+    } else {
+        $instansiIds = DataPrioritasSkSekda::where('tahun', $tahun)
+            ->pluck('instansi_token_id')
+            ->unique();
 
-        // Jika tahun kosong, tampilkan data tanpa filter tahun
-        if (!$tahun) {
-            $rekapitulasi = collect(); // Jika tidak ada tahun, tidak ada data yang ditampilkan
-        } else {
-            $instansiIds = DataPrioritasSkSekda::where('tahun', $tahun)
-                ->pluck('instansi_token_id')
-                ->unique();
-        
-            $instansis = InstansiToken::whereIn('id', $instansiIds)->get();
-        
-            $rekapitulasi = $instansis->map(function ($instansi) use ($tahun) {
-                $dataSk = DataPrioritasSkSekda::where('instansi_token_id', $instansi->id)
-                    ->where('tahun', $tahun)
-                    ->get();
-        
-                $rekap = RekapitulasiPemeriksaan::where('instansi_token_id', $instansi->id)
-                    ->where('tahun', $tahun)
-                    ->first();
-        
-                return (object)[
-                    'instansi' => $instansi,
-                    'jumlah_sk_sekda' => $dataSk->count(),
-                    'jumlah_terdaftar_di_portal' => $rekap->jumlah_terdaftar_di_portal ?? 0,
-                    'jumlah_data_terisi' => $rekap->jumlah_data_terisi ?? 0,
-                    'status' => $rekap->status ?? 'Belum Diperiksa',
-                    'tahun' => $tahun,
-                ];
-            });
-        }
+        $instansis = InstansiToken::whereIn('id', $instansiIds)->get();
 
-        // Pagination manual karena ini bukan dari query builder
-        $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
-        $perPage = 10;
-        $currentItems = $rekapitulasi->slice(($currentPage - 1) * $perPage, $perPage)->values();
-        $paginatedRekap = new \Illuminate\Pagination\LengthAwarePaginator(
-            $currentItems,
-            $rekapitulasi->count(),
-            $perPage,
-            $currentPage,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
+        $rekapitulasi = $instansis->map(function ($instansi) use ($tahun) {
+            $dataSk = DataPrioritasSkSekda::where('instansi_token_id', $instansi->id)
+                ->where('tahun', $tahun)
+                ->get();
 
-        return view('pemeriksaan.index', [
-            'rekapitulasi' => $paginatedRekap,
-            'tahun' => $tahun,
-            'tahunList' => $tahunList,
-        ]);
+            $rekap = RekapitulasiPemeriksaan::where('instansi_token_id', $instansi->id)
+                ->where('tahun', $tahun)
+                ->first();
+
+            return (object)[
+                'instansi' => $instansi,
+                'jumlah_sk_sekda' => $dataSk->count(),
+                'jumlah_terdaftar_di_portal' => $rekap->jumlah_terdaftar_di_portal ?? 0,
+                'jumlah_data_terisi' => $rekap->jumlah_data_terisi ?? 0,
+                'status' => $rekap->status ?? 'Belum Diperiksa',
+                'tahun' => $tahun,
+                'keterangan' => $dataSk->pluck('keterangan')->filter()->unique()->implode('; '),
+            ];
+        });
     }
+
+    // Pagination manual
+    $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+    $perPage = 10;
+    $currentItems = $rekapitulasi->slice(($currentPage - 1) * $perPage, $perPage)->values();
+    $paginatedRekap = new \Illuminate\Pagination\LengthAwarePaginator(
+        $currentItems,
+        $rekapitulasi->count(),
+        $perPage,
+        $currentPage,
+        ['path' => request()->url(), 'query' => request()->query()]
+    );
+
+    return view('pemeriksaan.index', [
+        'rekapitulasi' => $paginatedRekap,
+        'tahun' => $tahun,
+        'tahunList' => $tahunList,
+    ]);
+}
+
 
     public function periksa($instansiId, Request $request)
     {

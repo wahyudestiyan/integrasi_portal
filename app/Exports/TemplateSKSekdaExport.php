@@ -16,7 +16,8 @@ class TemplateSKSekdaExport implements FromArray, WithHeadings
             'nama_instansi',
             'judul_data',
             'id_data_portal',
-            'tahun', // ✅ sesuai key di database dan kode
+            'tahun', 
+            'keterangan',
         ];
     }
 

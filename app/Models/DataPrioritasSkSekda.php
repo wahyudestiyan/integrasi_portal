@@ -15,9 +15,10 @@ class DataPrioritasSkSekda extends Model
 
     protected $fillable = [
         'instansi_token_id',
-        'tahun',
         'judul_data',
         'id_data_portal',
+        'tahun',
+        'keterangan',
     ];
 
     public function instansi()

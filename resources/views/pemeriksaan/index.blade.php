@@ -43,6 +43,7 @@
                     <th>Judul Data Prioritas Terdaftar</th>
                     <th>Data Prioritas Masuk</th>
                     <th>Status</th>
+                    <th>Keterangan</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -54,12 +55,13 @@
                     <td class="text-center">{{ $rekap->jumlah_sk_sekda }}</td>
                     <td class="text-center">{{ $rekap->jumlah_terdaftar_di_portal }}</td>
                     <td class="text-center">{{ $rekap->jumlah_data_terisi }}</td>
-                                                <td class="text-center">
+                    <td class="text-center">
                             <span class="badge {{ $rekap->status === 'Lengkap' ? 'bg-success' : 'bg-danger' }}">
                                 {{ $rekap->status }}
                             </span>
-                        </td>
-                        <td class="text-center">
+                    </td>
+                    <td class="text-center">{{ $rekap->keterangan ?? '-' }}</td>
+                    <td class="text-center">
                         <div class="d-flex justify-content-center">
                             <form method="POST" action="{{ route('pemeriksaan.periksa', ['instansi' => $rekap->instansi->id, 'tahun' => request('tahun', date('Y'))]) }}">
                                 @csrf

@@ -21,9 +21,11 @@ class DataPrioritasSkImport implements ToModel, WithHeadingRow
 
         return new DataPrioritasSkSekda([
             'instansi_token_id' => $instansi->id,
-            'tahun' => $row['tahun'],
             'judul_data' => $row['judul_data'],
             'id_data_portal' => $row['id_data_portal'],
+            'tahun' => $row['tahun'],
+            'keterangan' => $row['keterangan'], // ✅ tambahkan ini
         ]);
+        
     }
 }
