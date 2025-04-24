@@ -50,7 +50,7 @@
             <tbody>
                 @forelse($rekapitulasi as $index => $rekap)
                     <tr>
-                    <td class="text-center">{{ $loop->iteration }}</td>
+                    <td class="text-center">{{ $rekapitulasi->firstItem() + $loop->index }}</td>
                     <td>{{ $rekap->instansi->nama_instansi }}</td>
                     <td class="text-center">{{ $rekap->jumlah_sk_sekda }}</td>
                     <td class="text-center">{{ $rekap->jumlah_terdaftar_di_portal }}</td>
