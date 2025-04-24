@@ -66,6 +66,7 @@
                             <form method="POST" action="{{ route('pemeriksaan.periksa', ['instansi' => $rekap->instansi->id, 'tahun' => request('tahun', date('Y'))]) }}">
                                 @csrf
                                 <input type="hidden" name="tahun" value="{{ request('tahun') ?? date('Y') }}">
+                                <input type="hidden" name="page" value="{{ request('page') }}">
                                 <button type="submit" class="btn btn-sm btn-warning">Periksa</button>
                             </form>
                             <a href="{{ route('pemeriksaan.lihatJudul', ['instansi' => $rekap->instansi->id, 'tahun' => $tahun]) }}" class="btn btn-sm btn-primary ms-1">

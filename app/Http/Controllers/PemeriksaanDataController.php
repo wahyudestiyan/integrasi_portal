@@ -218,9 +218,11 @@ class PemeriksaanDataController extends Controller
             ]
         );
     
-        return redirect()->route('pemeriksaan.index', ['tahun' => $tahun])
-            ->with('success', 'Pemeriksaan data berhasil disimpan untuk tahun ' . $tahun);
-    }
+        return redirect()->route('pemeriksaan.index', [
+            'tahun' => $tahun,
+            'page' => $request->get('page'), // ambil page dari query
+        ])->with('success', 'Pemeriksaan data berhasil disimpan untuk tahun ' . $tahun);
+        }        
     
 
     private function getDataFromApi($instansi, $tahun)
