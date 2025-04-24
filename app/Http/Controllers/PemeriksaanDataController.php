@@ -36,17 +36,44 @@ class PemeriksaanDataController extends Controller
 
     // Mengimpor file Excel
     public function importExcel(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls'
-        ]);
+{
+    $request->validate([
+        'file' => 'required|file|mimes:xlsx,xls'
+    ]);
 
-        // Import file Excel ke dalam sistem
-        Excel::import(new DataPrioritasSkImport, $request->file('file'));
+    // Ambil semua data dari file Excel
+    $collection = Excel::toCollection(new DataPrioritasSkImport, $request->file('file'))[0];
 
-        // Redirect kembali dengan pesan sukses
-        return redirect()->back()->with('success', 'Data berhasil diimport dari file Excel.');
+    $dataBaru = [];
+    $idDataPortalExcel = [];
+
+    foreach ($collection as $row) {
+        $idDataPortal = $row['id_data_portal'];
+
+        if (!$idDataPortal) continue;
+
+        $idDataPortalExcel[] = $idDataPortal;
+
+        $instansi = \App\Models\InstansiToken::where('nama_instansi', $row['nama_instansi'])->first();
+        if (!$instansi) continue;
+
+        // Update jika sudah ada, atau insert kalau belum ada
+        DataPrioritasSkSekda::updateOrCreate(
+            ['id_data_portal' => $idDataPortal],
+            [
+                'instansi_token_id' => $instansi->id,
+                'judul_data' => $row['judul_data'],
+                'tahun' => $row['tahun'],
+                'updated_at' => now(), // pastikan timestamp update
+            ]
+        );
     }
+
+    // Hapus data yang tidak ada di Excel
+    DataPrioritasSkSekda::whereNotIn('id_data_portal', $idDataPortalExcel)->delete();
+
+    return redirect()->back()->with('success', 'Data berhasil disinkronisasi dari file Excel.');
+}
 
     /**
      * Menampilkan halaman rekap pemeriksaan (dengan filter tahun)
