@@ -152,7 +152,7 @@ $sektors = [
             overflow-x: auto;
             scroll-behavior: smooth;
             padding: 0 20px;
-            height: 60px; /* batasi tinggi hanya untuk scroll area */
+            height: 55px; /* batasi tinggi hanya untuk scroll area */
         }
 
 
