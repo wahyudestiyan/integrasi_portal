@@ -20,7 +20,7 @@ $sektors = [
             'Pangan' => ['icon' => 'fa-apple-alt', 'url' => 'https://metabase.domainmu.com/public/dashboard/pangan'],
             'Pertanahan' => ['icon' => 'fa-map-marked-alt', 'url' => 'https://metabase.domainmu.com/public/dashboard/pertanahan'],
             'Lingkungan Hidup' => ['icon' => 'fa-tree', 'url' => 'https://metabase.domainmu.com/public/dashboard/lingkungan-hidup'],
-            'Administrasi Kependudukan dan Pencatatan Sipil' => ['icon' => 'fa-id-card', 'url' => 'https://metabase.domainmu.com/public/dashboard/administrasi-kependudukan'],
+            'Administrasi Kependudukan dan Pencatatan Sipil' => ['icon' => 'fa-id-card', 'url' => 'https://satudata.jatengprov.go.id/mtb/public/dashboard/7412d5ab-c049-42ae-8d89-a175005a495e'],
             'Pemberdayaan Masyarakat dan Desa' => ['icon' => 'fa-users-cog', 'url' => 'https://metabase.domainmu.com/public/dashboard/pemberdayaan-masyarakat'],
             'Pengendalian Penduduk dan Keluarga Berencana' => ['icon' => 'fa-baby', 'url' => 'https://metabase.domainmu.com/public/dashboard/keluarga-berencana'],
             'Perhubungan' => ['icon' => 'fa-bus', 'url' => 'https://metabase.domainmu.com/public/dashboard/perhubungan'],
