@@ -260,9 +260,9 @@ $sektors = [
     </div>
 
    <footer>
-    <?php
-echo 'Aziz sayang Icha ❤️ &copy; ' . date("Y");
-?>
+        <?php
+    echo 'Portal Data Jawa Tengah &copy; ' . date("Y");
+    ?>
 
     </footer>
 
