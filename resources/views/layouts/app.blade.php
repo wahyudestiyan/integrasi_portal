@@ -133,11 +133,11 @@
                 </li>
 
                 <!-- Menu Visualisasi API -->
-                <li class="mb-2">
+                <!-- <li class="mb-2">
                     <a href="{{ route('visualisasi.index') }}" class="block py-2 px-4 rounded-md bg-blue-500 hover:bg-blue-600 transition-all duration-300">
                         <i class="fa fa-chart-bar mr-2"></i> <span>Visualisasi API</span>
                     </a>
-                </li>
+                </li> -->
                 <li class="mb-2">
                     <a href="{{ route('monitoring.index') }}" class="block py-2 px-4 rounded-md bg-blue-500 hover:bg-blue-600 transition-all duration-300">
                         <i class="fa fa-desktop mr-2"></i> <span>Monitoring Judul</span>
