@@ -9,6 +9,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StatisBpsController;
 use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\PemeriksaanDataController;
+use App\Http\Controllers\VisualisasiPortalController;
 
 
 
@@ -16,6 +17,7 @@ Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
+Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('auth');
 Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('auth');
 
 Route::get('/api', [ApiController::class, 'index'])->name('api.index')->middleware('auth');
@@ -119,6 +121,11 @@ Route::get('/pemeriksaan/lihatjudul/{instansi}/{tahun}', [PemeriksaanDataControl
 Route::get('pemeriksaan/export', [PemeriksaanDataController::class, 'export'])->name('pemeriksaan.export');
 
 
+
+
+Route::prefix('portal/visualisasi')->group(function () {
+    Route::get('/visualisasiportal', [VisualisasiPortalController::class, 'index'])->name('visualisasiportal.index');
+});
 
 
 

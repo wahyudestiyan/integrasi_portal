@@ -148,6 +148,11 @@
                         <i class="fa fa-clipboard-check mr-2 text-white"></i> <span>Pemeriksaan Data</span>
                     </a>
     </li>
+            <li class="mb-2">
+                            <a href="{{ route('visualisasiportal.index') }}" class="block py-2 px-4 rounded-md bg-blue-500 hover:bg-blue-600 transition-all duration-300 text-white">
+                                <i class="fa fa-chart-bar mr-2"></i> <span>Visualisasi Portal</span>
+                            </a>
+            </li>
             </ul>
         </nav>
 
