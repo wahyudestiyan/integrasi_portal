@@ -60,22 +60,18 @@ $sektors = [
             flex-direction: column;
         }
 
-            header {
+        header {
             background-color: #003366;
             color: white;
             padding: 10px 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative; /* penting agar login bisa absolut di kanan */
-            height: 60px;
+            position: relative; /* agar posisi absolute bisa bekerja */
+            height: 50px;
             text-align: center;
         }
 
-        .logo-container h2 {
-            margin: 0;
-            font-size: 20px;
-        }
 
         .login-link {
             position: absolute;
@@ -99,14 +95,48 @@ $sektors = [
         }
 
 
+                .logo-container {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+        }
+
         .logo-container img {
-            height: 50px;
-            margin-right: 15px;
+            height: 40px;
+            margin-right: 10px;
         }
 
         .logo-container h2 {
             margin: 0;
-            font-size: 20px;
+            font-size: 18px;
+            white-space: nowrap; /* supaya tidak turun ke bawah */
+        }
+
+        .login-link {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .login-link a {
+            background-color: #0055a5;
+            color: white;
+            font-size: 14px;
+            text-decoration: none;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: opacity 0.2s ease;
+        }
+
+        .login-link a:hover {
+            background-color: rgb(4, 37, 75);
+            text-decoration: underline;
+            opacity: 0.8;
         }
 
         .sector-wrapper {
@@ -199,9 +229,10 @@ $sektors = [
     </style>
 </head>
 <body>
-   <header>
+ <header>
     <div class="logo-container">
-        <h2>Selamat Datang - Portal Data Jawa Tengah</h2>
+        <img src="{{ asset('assets/img/portal-data.png') }}" alt="Logo" />
+        <h2>Portal Data Jawa Tengah</h2>
     </div>
     <div class="login-link">
         <a href="https://satudata.jatengprov.go.id/site/login">Login</a>
