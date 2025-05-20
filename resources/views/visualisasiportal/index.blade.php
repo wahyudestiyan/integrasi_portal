@@ -1,6 +1,6 @@
 <?php
 $sektors = [
-            'Pendidikan' => ['icon' => 'fa-graduation-cap', 'url' => ''],
+            'Pendidikan' => ['icon' => 'fa-graduation-cap', 'url' => 'https://satudata.jatengprov.go.id/mtb/public/dashboard/5db42290-3c53-44d2-8e9f-760d8fb4995e'],
             'Kesehatan' => ['icon' => 'fa-stethoscope', 'url' => 'https://satudata.jatengprov.go.id/mtb/public/dashboard/a9f4b2b6-8a73-4cfe-82b6-c94161cca155'],
             'Pekerjaan Umum dan Penataan Ruang' => ['icon' => 'fa-building', 'url' => 'https://metabase.domainmu.com/public/dashboard/pekerjaan-umum'],
             'Perumahan Rakyat dan Kawasan Pemukiman' => ['icon' => 'fa-home', 'url' => 'https://metabase.domainmu.com/public/dashboard/perumahan'],
@@ -226,6 +226,7 @@ $sektors = [
             padding: 10px;
             font-size: 14px;
         }
+        
     </style>
 </head>
 <body>
