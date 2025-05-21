@@ -74,10 +74,10 @@ $sektors = [
 
 
         .login-link {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+            /* position: absolute; */
+            /* right: 20px; */
+            /* top: 50%; */
+            /* transform: translateY(-50%); */
         }
 
         .login-link a {
@@ -96,10 +96,10 @@ $sektors = [
 
 
                 .logo-container {
-            position: absolute;
-            left: 20px;
+            /* position: absolute; */
+            /* left: 20px; */
             top: 50%;
-            transform: translateY(-50%);
+            /* transform: translateY(-50%); */
             display: flex;
             align-items: center;
         }
@@ -116,11 +116,12 @@ $sektors = [
         }
 
         .login-link {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+            position: relative; /* Ganti dari absolute */
+            transform: none;
+            right: 0;
+            top: 0;
         }
+
 
         .login-link a {
             background-color: #0055a5;
@@ -230,15 +231,26 @@ $sektors = [
     </style>
 </head>
 <body>
- <header>
-    <div class="logo-container">
-        <img src="{{ asset('assets/img/portal-data.png') }}" alt="Logo" />
-        <h2>Portal Data Jawa Tengah</h2>
-    </div>
-    <div class="login-link">
-        <a href="https://satudata.jatengprov.go.id/site/login">Login</a>
-    </div>
+<header style="display: flex; align-items: center; justify-content: space-between; padding: 10px 60px;">
+  <div class="logo-container" style="display: flex; align-items: center; gap: 10px;">
+    <img src="{{ asset('assets/img/pemprov.png') }}" alt="Logo" />
+    <img src="{{ asset('assets/img/portal-data.png') }}" alt="Logo" />
+    <h2>Portal Data Jawa Tengah</h2>
+  </div>
+
+  <!-- Bungkus input dan login dalam satu div -->
+  <div class="search-login" style="display: flex; align-items: center; gap: 10px;">
+    <input type="text" id="searchInput" onkeyup="filterSectors()" placeholder="Cari Urusan..." 
+           style="width: 200px; padding: 8px; font-size: 14px; border: none; border-radius: 4px;">
+    <a href="https://satudata.jatengprov.go.id/site/login" 
+       style="background-color: #0055a5; color: white; font-size: 14px; text-decoration: none;
+              padding: 6px 12px; border-radius: 5px; font-weight: bold;">
+      Login
+    </a>
+  </div>
 </header>
+
+
 
 
    <div class="sector-wrapper">
@@ -255,13 +267,16 @@ $sektors = [
 </div>
 
 
+
+
+
     <div class="dashboard-container">
         <iframe id="dashboardFrame" src=""></iframe>
     </div>
 
    <footer>
         <?php
-    echo 'Portal Data Jawa Tengah &copy; ' . date("Y");
+    echo 'Dinas Komunikasi dan Informatika Provinsi Jawa Tengah &copy; ' . date("Y");
     ?>
 
     </footer>
@@ -283,11 +298,25 @@ $sektors = [
         }
         const sectorMenu = document.getElementById('sectorMenu');
 
-sectorMenu.addEventListener('wheel', (e) => {
-    e.preventDefault(); // cegah scroll vertikal halaman
-    sectorMenu.scrollLeft += e.deltaY; // scroll horizontal sesuai arah wheel vertikal
-});
+            sectorMenu.addEventListener('wheel', (e) => {
+                e.preventDefault(); // cegah scroll vertikal halaman
+                sectorMenu.scrollLeft += e.deltaY; // scroll horizontal sesuai arah wheel vertikal
+            });
 
+            function filterSectors() {
+                const input = document.getElementById('searchInput');
+                const filter = input.value.toLowerCase();
+                const sectorItems = document.querySelectorAll('.sector-menu-item');
+
+                sectorItems.forEach(item => {
+                    const text = item.textContent || item.innerText;
+                    if (text.toLowerCase().indexOf(filter) > -1) {
+                        item.style.display = "flex";  // atau "block" tergantung display aslinya
+                    } else {
+                        item.style.display = "none";
+                    }
+                });
+            }
 
         // Load dashboard pertama saat halaman dibuka
         window.onload = function () {
