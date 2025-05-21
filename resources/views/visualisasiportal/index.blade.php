@@ -281,6 +281,13 @@ $sektors = [
             // Tambahkan 'active' ke item yang diklik
             element.classList.add('active');
         }
+        const sectorMenu = document.getElementById('sectorMenu');
+
+sectorMenu.addEventListener('wheel', (e) => {
+    e.preventDefault(); // cegah scroll vertikal halaman
+    sectorMenu.scrollLeft += e.deltaY; // scroll horizontal sesuai arah wheel vertikal
+});
+
 
         // Load dashboard pertama saat halaman dibuka
         window.onload = function () {
