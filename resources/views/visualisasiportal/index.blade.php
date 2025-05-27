@@ -234,6 +234,7 @@ $sektors = [
 <header style="display: flex; align-items: center; justify-content: space-between; padding: 10px 60px;">
   <div class="logo-container" style="display: flex; align-items: center; gap: 10px;">
     <img src="{{ asset('assets/img/pemprov.png') }}" alt="Logo" />
+    <img src="{{ asset('assets/img/ngopeninglakoni.png') }}" alt="Logo" />
     <img src="{{ asset('assets/img/portal-data.png') }}" alt="Logo" />
     <h2>Portal Data Jawa Tengah</h2>
   </div>
