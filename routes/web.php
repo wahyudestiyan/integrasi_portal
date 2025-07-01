@@ -130,7 +130,7 @@ Route::prefix('portal/visualisasi')->group(function () {
 
 
 Route::prefix('indah-kegiatan')->group(function () {
-    Route::get('/', [IndahKegiatanController::class, 'index'])->name('indah-kegiatan.index');
+    Route::get('/indah-kegiatan', [IndahKegiatanController::class, 'index'])->name('indah-kegiatan.index');
     Route::get('/sync', [IndahKegiatanController::class, 'sync'])->name('indah-kegiatan.sync');
 
     // Pastikan ini duluan
