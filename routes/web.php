@@ -10,7 +10,7 @@ use App\Http\Controllers\StatisBpsController;
 use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\PemeriksaanDataController;
 use App\Http\Controllers\VisualisasiPortalController;
-
+use App\Http\Controllers\IndahKegiatanController;
 
 
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -125,6 +125,34 @@ Route::get('pemeriksaan/export', [PemeriksaanDataController::class, 'export'])->
 
 Route::prefix('portal/visualisasi')->group(function () {
     Route::get('/visualisasiportal', [VisualisasiPortalController::class, 'index'])->name('visualisasiportal.index');
+});
+
+
+
+Route::prefix('indah-kegiatan')->group(function () {
+    Route::get('/', [IndahKegiatanController::class, 'index'])->name('indah-kegiatan.index');
+    Route::get('/sync', [IndahKegiatanController::class, 'sync'])->name('indah-kegiatan.sync');
+
+    // Pastikan ini duluan
+    Route::get('/{id}/sync-msvar', [IndahKegiatanController::class, 'syncMsvar'])->name('msvar.sync');
+    Route::get('/{id}/sync-msind', [IndahKegiatanController::class, 'syncMsind'])->name('msind.sync');
+    
+
+    // Letakkan PALING AKHIR
+    Route::get('/{id}', [IndahKegiatanController::class, 'show'])->name('indah-kegiatan.show');
+
+        // Menampilkan semua variabel untuk 1 kegiatan
+    Route::get('/{id}/msvar', [IndahKegiatanController::class, 'showAllMsvar'])->name('msvar.index');
+
+    // Menampilkan semua indikator untuk 1 kegiatan
+    Route::get('/{id}/msind', [IndahKegiatanController::class, 'showAllMsind'])->name('msind.index');
+
+     Route::get('/msvar/detail/{id}', [IndahKegiatanController::class, 'showMsvar'])->name('msvar.show');
+    Route::get('/msind/detail/{id}', [IndahKegiatanController::class, 'showMsind'])->name('msind.show');
+Route::get('/indah-kegiatan/{id}/download-pdf', [IndahKegiatanController::class, 'downloadPdfkeg'])->name('indah-kegiatan.downloadPdf');
+Route::get('/msvar/{id}/download-pdf', [IndahKegiatanController::class, 'downloadPdfvar'])->name('var.downloadPdf');
+Route::get('/msind/{id}/download-pdf', [IndahKegiatanController::class, 'downloadPdfind'])->name('ind.downloadPdf');
+
 });
 
 

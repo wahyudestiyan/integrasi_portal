@@ -153,6 +153,14 @@
                                 <i class="fa fa-chart-bar mr-2"></i> <span>Visualisasi Portal</span>
                             </a>
             </li>
+            <li class="mb-2">
+    <a href="{{ route('indah-kegiatan.index') }}"
+       class="block py-2 px-4 rounded-md bg-blue-500 hover:bg-blue-600 transition-all duration-300 text-white">
+        <i class="fa fa-file-alt mr-2"></i> <span>Metadata</span>
+
+    </a>
+</li>
+
             </ul>
         </nav>
 
@@ -203,9 +211,18 @@
 
     <!-- Konten Utama -->
     <div class="content">
-        <main class="max-w-screen-xl mx-auto mt-8 px-5">
-            @yield('content')
-        </main>
+    <main class="container-fluid mt-4 px-4">
+
+
+
+    {{-- Jika sedang di salah satu route metadata, tampilkan tab --}}
+    @if(in_array(Route::currentRouteName(), ['indah-kegiatan.show', 'msvar.index', 'msind.index', 'msvar.show', 'msind.show']))
+    @include('navigasi.tab-metadata', ['kegiatan' => $kegiatan ?? null])
+@endif
+
+
+    @yield('content')
+</main>
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
