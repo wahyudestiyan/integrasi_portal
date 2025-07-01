@@ -156,7 +156,7 @@
             <li class="mb-2">
     <a href="{{ route('indah-kegiatan.index') }}"
        class="block py-2 px-4 rounded-md bg-blue-500 hover:bg-blue-600 transition-all duration-300 text-white">
-        <i class="fa fa-file-alt mr-2"></i> <span>Metadata</span>
+        <i class="fa fa-file-alt mr-2"></i> <span>Metadata Statistik</span>
 
     </a>
 </li>
