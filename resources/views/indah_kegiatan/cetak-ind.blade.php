@@ -11,7 +11,7 @@
     background-color: #ffffff;
     box-sizing: border-box;
     overflow-x: auto;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Helvetica Neue', 'Helvetica', Arial, sans-serif;
     color: #1F2937;
     font-size: 14px;
     line-height: 1.6;
@@ -208,13 +208,16 @@ th.t {
 
 </head>
 <body>
+
+<h1 class="text-center">METADATA INDIKATOR</h1>
+
 <div class="detail-row">
     <div class="detail-label">Metadata Kegiatan:</div>
     <div class="detail-value">{{ ucwords(strtolower(str_replace('_', ' ', $kegiatan->judul_kegiatan ))) }}</div>
 </div>
 
 <div class="detail-row">
-    <div class="detail-label">Detail Metadata Variabel:</div>
+    <div class="detail-label">Detail Metadata Indikator:</div>
     <dv class="detail-value">{{ ucwords(strtolower(str_replace('_', ' ', $msind->nama ))) }}</div>
 </div>
 <hr>
