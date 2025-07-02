@@ -19,7 +19,11 @@
 
 <div class="container">
     <h1 class="mb-4">Daftar Metadata Kegiatan Statistik</h1>
-<input type="text" id="search-input" class="form-control mb-3" placeholder="Cari berdasarkan tahun, instansi, atau judul kegiatan...">
+<form method="GET" action="{{ route('indah-kegiatan.index') }}" class="d-flex mb-3" style="max-width: 400px;">
+    <input type="text" name="q" class="form-control me-2" placeholder="Cari tahun, instansi, atau judul..." value="{{ request('q') }}">
+    <button type="submit" class="btn btn-primary">Cari</button>
+</form>
+
 
     <table class="table table-bordered table-striped" >
         <thead class="table-dark">
@@ -74,9 +78,12 @@
 </div>
 
 <script>
-    $('#search-input').on('keyup', function () {
-        let query = $(this).val();
+let timer;
+$('#search-input').on('keyup', function () {
+    clearTimeout(timer);
+    const query = $(this).val();
 
+    timer = setTimeout(() => {
         $.ajax({
             url: '{{ route("indah-kegiatan.index", [], true) }}',
             type: 'GET',
@@ -85,11 +92,13 @@
                 $('#table-container').html(data);
             },
             error: function (xhr, status, error) {
-                console.error("AJAX Error:", status, error);
-                console.log("Response Text:", xhr.responseText);
+                console.error("Error:", status, error);
+                console.log(xhr.responseText);
             }
         });
-    });
+    }, 300); // delay 300ms setelah user berhenti mengetik
+});
+
 </script>
 
 
