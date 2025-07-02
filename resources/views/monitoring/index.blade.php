@@ -173,8 +173,13 @@
         document.getElementById('modalContent').innerHTML = '<p>⏳ Memuat data...</p>';
         document.getElementById('modalTahun').textContent = tahun;
 
-        fetch(`/monitoring/data/${id_api}/${tahun}`)
-            .then(res => res.json())
+        const fetchUrl = `{{ url('monitoring/data') }}/${id_api}/${tahun}`;
+
+        fetch(fetchUrl)
+            .then(res => {
+                if (!res.ok) throw new Error('Network response was not OK');
+                return res.json();
+            })
             .then(res => {
                 const data = res.data_filtered;
                 if (!data || data.length === 0) {
@@ -215,6 +220,5 @@
         modal.show();
     }
 </script>
-
 
 @endsection

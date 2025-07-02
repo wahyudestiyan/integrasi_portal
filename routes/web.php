@@ -107,6 +107,8 @@ Route::post('/monitoring/sync-instansi/{id}', [MonitoringController::class, 'upd
 Route::get('/monitoring/create', [MonitoringController::class, 'create'])->name('monitoring.create');
 Route::post('/monitoring/import-excel', [MonitoringController::class, 'importExcel'])->name('monitoring.import.excel');
 Route::get('/monitoring/exportExcel/{instansiId}', [MonitoringController::class, 'exportExcel'])->name('monitoring.exportExcel');
+Route::get('/monitoring/data/{id_api}/{tahun}', [MonitoringController::class, 'getDataByYear'])->name('ambildata');
+
 
 
 
