@@ -78,7 +78,7 @@
         let query = $(this).val();
 
         $.ajax({
-            url: '{{ route("indah-kegiatan.index", [], true) }}',
+            url: '{{ url("/indah-kegiatan") }}',
             type: 'GET',
             data: { q: query },
             success: function (data) {
