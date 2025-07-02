@@ -173,9 +173,9 @@ function lihatDataTahun(id_api, tahun) {
     document.getElementById('modalContent').innerHTML = '<p>⏳ Memuat data...</p>';
     document.getElementById('modalTahun').textContent = tahun;
 
-    const fetchUrl = '{{ route("ambildata", ["id_api" => "__ID__", "tahun" => "__TAHUN__"]) }}'
+    const fetchUrl = `{{ route('ambildata', ['id_api' => '__ID__', 'tahun' => '__YEAR__'], true) }}`
         .replace('__ID__', id_api)
-        .replace('__TAHUN__', tahun);
+        .replace('__YEAR__', tahun);
 
     fetch(fetchUrl)
         .then(res => res.json())
@@ -186,11 +186,7 @@ function lihatDataTahun(id_api, tahun) {
                 return;
             }
 
-            const allKeys = new Set();
-            data.forEach(item => {
-                Object.keys(item).forEach(key => allKeys.add(key));
-            });
-            const headers = Array.from(allKeys);
+            const headers = [...new Set(data.flatMap(item => Object.keys(item)))];
 
             let html = `<div class="table-responsive"><table class="table table-bordered table-striped table-sm">
                 <thead class="table-light"><tr>`;
