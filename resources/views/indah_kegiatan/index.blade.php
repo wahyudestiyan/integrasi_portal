@@ -78,15 +78,15 @@
         let query = $(this).val();
 
         $.ajax({
-            url: '{{ route("indah-kegiatan.index", [], true) }}', // HTTPS otomatis
+            url: '{{ route("indah-kegiatan.index", [], true) }}',
             type: 'GET',
             data: { q: query },
             success: function (data) {
                 $('#table-container').html(data);
             },
             error: function (xhr, status, error) {
-                console.error("AJAX error:", status, error);
-                console.log(xhr.responseText); // debug tambahan
+                console.error("AJAX Error:", status, error);
+                console.log("Response Text:", xhr.responseText);
             }
         });
     });
