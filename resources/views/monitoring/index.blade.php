@@ -169,56 +169,56 @@
   </div>
 </div>
 <script>
-    function lihatDataTahun(id_api, tahun) {
-        document.getElementById('modalContent').innerHTML = '<p>⏳ Memuat data...</p>';
-        document.getElementById('modalTahun').textContent = tahun;
+function lihatDataTahun(id_api, tahun) {
+    document.getElementById('modalContent').innerHTML = '<p>⏳ Memuat data...</p>';
+    document.getElementById('modalTahun').textContent = tahun;
 
-        const fetchUrl = `{{ url('monitoring/data') }}/${id_api}/${tahun}`;
+    const fetchUrl = '{{ route("ambildata", ["id_api" => "__ID__", "tahun" => "__TAHUN__"]) }}'
+        .replace('__ID__', id_api)
+        .replace('__TAHUN__', tahun);
 
-        fetch(fetchUrl)
-            .then(res => {
-                if (!res.ok) throw new Error('Network response was not OK');
-                return res.json();
-            })
-            .then(res => {
-                const data = res.data_filtered;
-                if (!data || data.length === 0) {
-                    document.getElementById('modalContent').innerHTML = '<p class="text-danger">Tidak ada data ditemukan untuk tahun ini.</p>';
-                    return;
-                }
+    fetch(fetchUrl)
+        .then(res => res.json())
+        .then(res => {
+            const data = res.data_filtered;
+            if (!data || data.length === 0) {
+                document.getElementById('modalContent').innerHTML = '<p class="text-danger">Tidak ada data ditemukan untuk tahun ini.</p>';
+                return;
+            }
 
-                const allKeys = new Set();
-                data.forEach(item => {
-                    Object.keys(item).forEach(key => allKeys.add(key));
-                });
-                const headers = Array.from(allKeys);
+            const allKeys = new Set();
+            data.forEach(item => {
+                Object.keys(item).forEach(key => allKeys.add(key));
+            });
+            const headers = Array.from(allKeys);
 
-                let html = `<div class="table-responsive"><table class="table table-bordered table-striped table-sm">
-                    <thead class="table-light"><tr>`;
+            let html = `<div class="table-responsive"><table class="table table-bordered table-striped table-sm">
+                <thead class="table-light"><tr>`;
+            headers.forEach(h => {
+                html += `<th>${h.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</th>`;
+            });
+            html += `</tr></thead><tbody>`;
+
+            data.forEach(item => {
+                html += `<tr>`;
                 headers.forEach(h => {
-                    html += `<th>${h.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</th>`;
+                    html += `<td>${item[h] !== undefined ? item[h] : ''}</td>`;
                 });
-                html += `</tr></thead><tbody>`;
-
-                data.forEach(item => {
-                    html += `<tr>`;
-                    headers.forEach(h => {
-                        html += `<td>${item[h] !== undefined ? item[h] : ''}</td>`;
-                    });
-                    html += `</tr>`;
-                });
-
-                html += `</tbody></table></div>`;
-                document.getElementById('modalContent').innerHTML = html;
-            })
-            .catch(err => {
-                console.error("FETCH ERROR:", err);
-                document.getElementById('modalContent').innerHTML = '<p class="text-danger">Gagal memuat data.</p>';
+                html += `</tr>`;
             });
 
-        const modal = new bootstrap.Modal(document.getElementById('dataModal'));
-        modal.show();
-    }
+            html += `</tbody></table></div>`;
+            document.getElementById('modalContent').innerHTML = html;
+        })
+        .catch(err => {
+            console.error("FETCH ERROR:", err);
+            document.getElementById('modalContent').innerHTML = '<p class="text-danger">Gagal memuat data.</p>';
+        });
+
+    const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+    modal.show();
+}
 </script>
+
 
 @endsection
