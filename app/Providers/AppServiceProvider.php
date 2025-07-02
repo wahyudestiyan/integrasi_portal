@@ -18,8 +18,12 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        Carbon::setLocale('id'); // Bahasa Indonesia
+ public function boot(): void
+{
+    Carbon::setLocale('id'); // Bahasa Indonesia
+
+    if (app()->environment('production')) {
+        \Illuminate\Support\Facades\URL::forceScheme('https');
     }
+}
 }

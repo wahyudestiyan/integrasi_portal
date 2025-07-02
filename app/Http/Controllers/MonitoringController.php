@@ -186,14 +186,13 @@ public function logs(Request $request, $instansiId)
 public function getDataByYear($id_api, $tahun)
 {
     $dataApi = DataApi::where('id_api', $id_api)->firstOrFail();
-    $instansi = $dataApi->instansi; // <-- ini yang benar
+    $instansi = $dataApi->instansi;
 
     if (!$instansi) {
         return response()->json(['error' => 'Instansi tidak ditemukan'], 404);
     }
 
     $token = $instansi->bearer_token;
-
     $allData = [];
     $page = 1;
 
