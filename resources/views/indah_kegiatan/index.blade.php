@@ -78,14 +78,19 @@
         let query = $(this).val();
 
         $.ajax({
-            url: '{{ url("/indah-kegiatan") }}',
+            url: '{{ route("indah-kegiatan.index", [], true) }}', // HTTPS otomatis
             type: 'GET',
             data: { q: query },
             success: function (data) {
                 $('#table-container').html(data);
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX error:", status, error);
+                console.log(xhr.responseText); // debug tambahan
             }
         });
     });
 </script>
+
 
 @endsection
