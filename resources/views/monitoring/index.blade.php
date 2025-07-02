@@ -100,6 +100,8 @@
                                 <th>ID API</th>
                                 <th>Judul</th>
                                 <th>Tahun Data</th>
+                                <th>Aksi</th>
+
                             </tr>
                         </thead>
                         <tbody>
@@ -109,6 +111,27 @@
                                     <td>{{ $data->id_api }}</td>
                                     <td>{{ $data->judul }}</td>
                                     <td>{{ $data->tahun_data }}</td>
+                                    <td>
+                                    @php
+                                        $tahunList = explode(',', $data->tahun_data);
+                                    @endphp
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            Lihat Tahun
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            @foreach($tahunList as $tahun)
+                                                <li>
+                                                    <a href="#" class="dropdown-item" onclick="lihatDataTahun('{{ $data->id_api }}', '{{ $tahun }}')">
+                                                        {{ $tahun }}
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </td>
+
                                 </tr>
                             @endforeach
                         </tbody>
@@ -128,4 +151,70 @@
 
 
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="dataModalLabel">Detail Data Tahun <span id="modalTahun"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modalContent">
+            <p class="text-center">Memuat data...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+    function lihatDataTahun(id_api, tahun) {
+        document.getElementById('modalContent').innerHTML = '<p>⏳ Memuat data...</p>';
+        document.getElementById('modalTahun').textContent = tahun;
+
+        fetch(`/monitoring/data/${id_api}/${tahun}`)
+            .then(res => res.json())
+            .then(res => {
+                const data = res.data_filtered;
+                if (!data || data.length === 0) {
+                    document.getElementById('modalContent').innerHTML = '<p class="text-danger">Tidak ada data ditemukan untuk tahun ini.</p>';
+                    return;
+                }
+
+                const allKeys = new Set();
+                data.forEach(item => {
+                    Object.keys(item).forEach(key => allKeys.add(key));
+                });
+                const headers = Array.from(allKeys);
+
+                let html = `<div class="table-responsive"><table class="table table-bordered table-striped table-sm">
+                    <thead class="table-light"><tr>`;
+                headers.forEach(h => {
+                    html += `<th>${h.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</th>`;
+                });
+                html += `</tr></thead><tbody>`;
+
+                data.forEach(item => {
+                    html += `<tr>`;
+                    headers.forEach(h => {
+                        html += `<td>${item[h] !== undefined ? item[h] : ''}</td>`;
+                    });
+                    html += `</tr>`;
+                });
+
+                html += `</tbody></table></div>`;
+                document.getElementById('modalContent').innerHTML = html;
+            })
+            .catch(err => {
+                console.error("FETCH ERROR:", err);
+                document.getElementById('modalContent').innerHTML = '<p class="text-danger">Gagal memuat data.</p>';
+            });
+
+        const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+        modal.show();
+    }
+</script>
+
+
 @endsection

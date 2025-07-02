@@ -10,10 +10,11 @@ class DataApi extends Model
 
     protected $fillable = ['id', 'instansi_token_id','id_api','judul','tahun_data'];
 
-    public function instansi()
-    {
-        return $this->belongsTo(InstansiToken::class);
-    }
+public function instansi()
+{
+    return $this->belongsTo(InstansiToken::class, 'instansi_token_id');
+}
+
 
     public function logs()
     {

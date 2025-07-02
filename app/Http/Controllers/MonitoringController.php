@@ -182,6 +182,40 @@ public function logs(Request $request, $instansiId)
     return view('monitoring.logs', compact('instansi', 'logs'));
 }
 
+
+public function getDataByYear($id_api, $tahun)
+{
+    $dataApi = DataApi::where('id_api', $id_api)->firstOrFail();
+    $instansi = $dataApi->instansi; // <-- ini yang benar
+
+    if (!$instansi) {
+        return response()->json(['error' => 'Instansi tidak ditemukan'], 404);
+    }
+
+    $token = $instansi->bearer_token;
+
+    $allData = [];
+    $page = 1;
+
+    do {
+        $res = Http::withToken($token)->get("https://satudata.jatengprov.go.id/v1/data/{$id_api}", ['page' => $page]);
+        if ($res->failed()) break;
+
+        $json = $res->json();
+        $allData = array_merge($allData, $json['data'] ?? []);
+        $page++;
+    } while (isset($json['_meta']) && $page <= $json['_meta']['pageCount']);
+
+    $availableYears = collect($allData)->pluck('tahun_data')->unique()->values();
+
+    return response()->json([
+        'requested' => $tahun,
+        'available_years' => $availableYears,
+        'data_filtered' => collect($allData)->filter(fn($item) => trim((string) $item['tahun_data']) === trim((string) $tahun))->values()
+    ]);
+}
+
+
 public function create()
 {
     return view('monitoring.create');
