@@ -139,7 +139,7 @@
                 </div>
             @else
                 <div class="alert alert-info mb-0">
-                    Instansi ini tidak memiliki data API.
+                    Data Tidak Tersedia
                 </div>
             @endif
         </div>
