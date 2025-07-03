@@ -5,11 +5,14 @@
 @section('content')
 <style>
     .dashboard-container {
-        display: flex;
-        gap: 30px;
-        overflow-x: auto;
-        padding: 10px 0;
-    }
+    display: flex;
+    gap: 30px;
+    overflow-x: auto;
+    padding: 10px 0;
+    max-width: 1200px; /* agar lebarnya setara dengan bagian bawah */
+    margin: 0 auto;     /* agar berada di tengah halaman */
+}
+
 
     .dashboard-card {
         min-width: 200px;
