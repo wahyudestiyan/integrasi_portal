@@ -100,7 +100,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
     <a href="{{ url('/') }}" class="block text-2xl font-bold mb-4 text-white hover:text-gray-300">
-            
+            DASHBOARD
     </a>
 
         <nav x-data="{ open: false }">
