@@ -157,21 +157,25 @@
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="dataModalLabel">Detail Data Tahun <span id="modalTahun"></span></h5>
+        <h5 class="modal-title" id="dataModalLabel">
+            Detail Data: <span id="modalJudul">Judul</span> Tahun <span id="modalTahun">Tahun</span>
+            </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div id="modalContent">
-            <p class="text-center">Memuat data...</p>
+          <p class="text-center">Memuat data...</p>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 <script>
 function lihatDataTahun(id_api, tahun) {
     document.getElementById('modalContent').innerHTML = '<p>⏳ Memuat data...</p>';
     document.getElementById('modalTahun').textContent = tahun;
+    document.getElementById('modalJudul').textContent = '...'; // Kosongkan/placeholder dulu
 
     const fetchUrl = `{{ route('ambildata', ['id_api' => '__ID__', 'tahun' => '__YEAR__'], true) }}`
         .replace('__ID__', id_api)
@@ -181,13 +185,15 @@ function lihatDataTahun(id_api, tahun) {
         .then(res => res.json())
         .then(res => {
             const data = res.data_filtered;
+            const judul = res.judul_data || 'Data Tidak Diketahui';
+            document.getElementById('modalJudul').textContent = judul; // ✅ Perbaikan disini
+
             if (!data || data.length === 0) {
                 document.getElementById('modalContent').innerHTML = '<p class="text-danger">Tidak ada data ditemukan untuk tahun ini.</p>';
                 return;
             }
 
             const headers = [...new Set(data.flatMap(item => Object.keys(item)))];
-
             let html = `<div class="table-responsive"><table class="table table-bordered table-striped table-sm">
                 <thead class="table-light"><tr>`;
             headers.forEach(h => {
@@ -214,6 +220,7 @@ function lihatDataTahun(id_api, tahun) {
     const modal = new bootstrap.Modal(document.getElementById('dataModal'));
     modal.show();
 }
+
 </script>
 
 

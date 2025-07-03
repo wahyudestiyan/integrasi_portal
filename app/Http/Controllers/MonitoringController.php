@@ -209,6 +209,7 @@ public function getDataByYear($id_api, $tahun)
 
     return response()->json([
         'requested' => $tahun,
+        'judul_data' => $dataApi->judul, // ⬅️ pastikan ini ADA
         'available_years' => $availableYears,
         'data_filtered' => collect($allData)->filter(fn($item) => trim((string) $item['tahun_data']) === trim((string) $tahun))->values()
     ]);
