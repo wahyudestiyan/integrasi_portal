@@ -1,6 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
+
+<style>
+    table.table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    table.table th, table.table td {
+        word-wrap: break-word;
+        vertical-align: middle;
+    }
+
+    td.text-start {
+        text-align: left;
+    }
+</style>
+
 <div class="mb-4">
     <form method="GET" action="{{ route('indah-kegiatan.sync') }}">
         <div class="input-group mb-3" style="max-width: 300px;">
@@ -16,90 +33,94 @@
 </div>
 @endif
 
-
 <div class="container">
     <h1 class="mb-4">Daftar Metadata Kegiatan Statistik</h1>
-<form method="GET" action="{{ route('indah-kegiatan.index') }}" class="d-flex mb-3" style="max-width: 400px;">
-    <input type="text" name="q" class="form-control me-2" placeholder="Cari tahun, instansi, atau judul..." value="{{ request('q') }}">
-    <button type="submit" class="btn btn-primary">Cari</button>
-</form>
 
+    <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
 
-    <table class="table table-bordered table-striped" >
+    <form method="GET" action="{{ route('indah-kegiatan.index') }}" class="d-flex flex-wrap gap-2" style="width: 100%;">
+        <!-- Search Input -->
+        <div class="flex-grow-1" style="min-width: 200px;">
+            <input type="text" id="search-input" name="q" class="form-control"
+                   placeholder="Cari instansi, atau judul..." value="{{ request('q') }}">
+        </div>
+
+        <!-- Filter Tahun -->
+        <div style="min-width: 200px;">
+            <select name="tahun" class="form-select" onchange="this.form.submit()">
+                <option value="">Periode: Semua Tahun</option>
+                @foreach (range(now()->year, 2022) as $th)
+                    <option value="{{ $th }}" {{ request('tahun') == $th ? 'selected' : '' }}>
+                        Tahun {{ $th }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Tombol opsional jika ingin tombol filter manual -->
+        {{-- <button type="submit" class="btn btn-primary">Filter</button> --}}
+    </form>
+
+</div>
+
+    <table class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>
-                <th class="text-center">No.</th>
-                <th class="text-center">Nama Kegiatan</th>
-                <th class="text-center">Tahun</th>
-                <th class="text-center">Jenis Statistik</th>
-                <th class="text-center">Produsen Data</th>
-                <th class="text-center">Status</th>
-                <th class="text-center">Aksi</th>
+                <th class="text-center" style="width: 5%;">No.</th>
+                <th class="text-start" style="width: 35%;">Nama Kegiatan</th>
+                <th class="text-center" style="width: 7%;">Tahun</th>
+                <th class="text-center" style="width: 15%;">Jenis Statistik</th>
+                <th class="text-start" style="width: 23%;">Produsen Data</th>
+                <th class="text-center" style="width: 7%;">Status</th>
+                <th class="text-center" style="width: 7%;">Aksi</th>
             </tr>
         </thead>
-
         <tbody id="table-container">
-            @forelse ($kegiatan as $index => $item)
-            <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ ucwords(strtolower(str_replace('_', ' ', $item->judul_kegiatan ))) }}</td>
-                <td>{{ ucwords(strtolower(str_replace('_', ' ', $item->tahun ))) }}</td>
-                <td>{{ ucwords(strtolower(str_replace('_', ' ', $item->jenis_statistik ))) }}</td>
-                <td>{{ ucwords(strtolower(str_replace('_', ' ', $item->produsen_data_name ))) }}</td>
-          <td>
-                <span class="badge bg-{{ $item->status == 'APPROVED' ? 'success' : 'warning' }}">
-                    {{ $item->status == 'APPROVED' ? 'Disetujui' : 'Menunggu' }}
-                </span>
-            </td>
-
-                <td>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Aksi
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('indah-kegiatan.show', $item->id) }}">Detail Kegiatan</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-success" href="{{ route('msvar.sync', $item->id) }}">🔄 Sinkron MsVar</a></li>
-                            <li><a class="dropdown-item text-primary" href="{{ route('msind.sync', $item->id) }}">🔄 Sinkron MsInd</a></li>
-                        </ul>
-
-                    </div>
-                </td>
-
-            </tr>
-            @empty
-            <tr>
-                <td colspan="8" class="text-center">Belum ada data kegiatan.</td>
-            </tr>
-            @endforelse
+            @include('indah_kegiatan.partials.table_rows')
         </tbody>
     </table>
+
+    <div id="pagination-container">
+        {{ $kegiatan->links('pagination::bootstrap-5') }}
+    </div>
 </div>
 
 <script>
 let timer;
+
 $('#search-input').on('keyup', function () {
     clearTimeout(timer);
     const query = $(this).val();
+    const tahun = '{{ request('tahun') }}';
 
     timer = setTimeout(() => {
-        $.ajax({
-            url: '{{ route("indah-kegiatan.index", [], true) }}',
-            type: 'GET',
-            data: { q: query },
-            success: function (data) {
-                $('#table-container').html(data);
-            },
-            error: function (xhr, status, error) {
-                console.error("Error:", status, error);
-                console.log(xhr.responseText);
-            }
-        });
-    }, 300); // delay 300ms setelah user berhenti mengetik
+        let url = '{{ route("indah-kegiatan.index") }}?q=' + query;
+        if (tahun) {
+            url += '&tahun=' + tahun;
+        }
+        fetchKegiatan(url);
+    }, 300);
 });
 
-</script>
+$(document).on('click', '.pagination a', function (e) {
+    e.preventDefault();
+    let url = $(this).attr('href');
+    fetchKegiatan(url);
+});
 
+function fetchKegiatan(url) {
+    $.ajax({
+        url: url,
+        type: 'GET',
+        success: function (data) {
+            $('#table-container').html(data.rows);
+            $('#pagination-container').html(data.pagination);
+        },
+        error: function (xhr) {
+            console.error(xhr.responseText);
+        }
+    });
+}
+</script>
 
 @endsection

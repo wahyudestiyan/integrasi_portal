@@ -16,53 +16,47 @@ class IndahKegiatanController extends Controller
     // Menampilkan daftar kegiatan
    public function index(Request $request)
 {
+    // Default tahun = tahun lalu (pelaporan tahun sebelumnya)
+    $defaultTahun = now()->year - 1;
+
+    // Ambil tahun dari query, jika tidak ada gunakan default
+    $selectedTahun = $request->input('tahun', $defaultTahun);
+
     $query = IndahKegiatan::query();
 
-    if ($request->has('q')) {
-        $q = $request->q;
-        $query->where(function($qBuilder) use ($q) {
-            $qBuilder->where('tahun', 'like', "%$q%")
-                     ->orWhere('produsen_data_name', 'like', "%$q%")
-                     ->orWhere('judul_kegiatan', 'like', "%$q%");
+    // Filter berdasarkan pencarian teks
+    if ($request->filled('q')) {
+        $search = $request->q;
+        $query->where(function ($qBuilder) use ($search) {
+            $qBuilder->where('tahun', 'like', "%$search%")
+                     ->orWhere('produsen_data_name', 'like', "%$search%")
+                     ->orWhere('judul_kegiatan', 'like', "%$search%");
         });
     }
 
-    $kegiatan = $query->orderBy('created_at', 'desc')->get();
+    // Filter berdasarkan tahun (default: tahun lalu)
+    if (!empty($selectedTahun)) {
+        $query->where('tahun', $selectedTahun);
+    }
 
+    // Ambil data dengan pagination
+    $kegiatan = $query->orderBy('created_at', 'desc')->paginate(10);
+    $kegiatan->appends($request->all());
+
+    // Buat daftar tahun dari 2019 sampai tahun sekarang
+    $tahunList = range(2022, now()->year);
+
+    // Jika AJAX, hanya render baris dan pagination
     if ($request->ajax()) {
-    $html = '';
-    foreach ($kegiatan as $index => $item) {
-        $html .= '<tr>
-            <td>' . ($index + 1) . '</td>
-            <td>' . ucwords(strtolower(str_replace("_", " ", $item->judul_kegiatan))) . '</td>
-            <td>' . $item->tahun . '</td>
-            <td>' . ucwords(strtolower(str_replace("_", " ", $item->jenis_statistik))) . '</td>
-            <td>' . ucwords(strtolower(str_replace("_", " ", $item->produsen_data_name))) . '</td>
-            <td><span class="badge bg-' . ($item->status == 'APPROVED' ? 'success' : 'warning') . '">' . ($item->status == 'APPROVED' ? 'Disetujui' : 'Menunggu') . '</span></td>
-            <td>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Aksi</button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="' . route('indah-kegiatan.show', $item->id) . '">Detail Kegiatan</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-success" href="' . route('msvar.sync', $item->id) . '">🔄 Sinkron MsVar</a></li>
-                        <li><a class="dropdown-item text-primary" href="' . route('msind.sync', $item->id) . '">🔄 Sinkron MsInd</a></li>
-                    </ul>
-                </div>
-            </td>
-        </tr>';
+        return response()->json([
+            'rows' => view('indah_kegiatan.partials.table_rows', compact('kegiatan'))->render(),
+            'pagination' => $kegiatan->links('pagination::bootstrap-5')->toHtml(),
+        ]);
     }
 
-    if ($kegiatan->isEmpty()) {
-        $html = '<tr><td colspan="8" class="text-center">Belum ada data kegiatan.</td></tr>';
-    }
-
-    return response($html);
+    return view('indah_kegiatan.index', compact('kegiatan', 'tahunList', 'selectedTahun'));
 }
 
-
-    return view('indah_kegiatan.index', compact('kegiatan'));
-}
 
 
 
