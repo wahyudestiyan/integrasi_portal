@@ -22,7 +22,8 @@
 <div class="mb-4">
     <form method="GET" action="{{ route('indah-kegiatan.sync') }}">
         <div class="input-group mb-3" style="max-width: 300px;">
-            <input type="number" name="tahun" class="form-control" placeholder="Tahun" value="{{ request('tahun', now()->year) }}">
+            <input type="number" name="tahun" class="form-control" placeholder="Tahun"
+                   value="{{ request('tahun', now()->year) }}">
             <button type="submit" class="btn btn-success">Sinkronkan Data</button>
         </div>
     </form>
@@ -39,7 +40,7 @@
 
     {{-- Search & Filter --}}
     <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
-        <form method="GET" action="{{ route('indah-kegiatan.index') }}" class="d-flex flex-wrap gap-2 w-100">
+        <form id="filter-form" method="GET" action="{{ route('indah-kegiatan.index') }}" class="d-flex flex-wrap gap-2 w-100">
             {{-- Input Pencarian --}}
             <div class="flex-grow-1" style="min-width: 200px;">
                 <input type="text" id="search-input" name="q" class="form-control"
@@ -48,7 +49,7 @@
 
             {{-- Filter Tahun --}}
             <div style="min-width: 200px;">
-                <select name="tahun" class="form-select" onchange="this.form.submit()">
+                <select name="tahun" id="tahun-select" class="form-select">
                     <option value="">Periode: Semua Tahun</option>
                     @foreach (range(now()->year, 2022) as $th)
                         <option value="{{ $th }}" {{ request('tahun', now()->year - 1) == $th ? 'selected' : '' }}>
@@ -79,47 +80,39 @@
     </table>
 
     <div id="pagination-container">
-        {{ $kegiatan->links('pagination::bootstrap-5') }}
+        {{ $kegiatan->withQueryString()->links('pagination::bootstrap-5') }}
     </div>
 </div>
 
-{{-- Simpan query kecuali "page" --}}
-@php
-    $queryString = http_build_query(request()->except('page'));
-@endphp
-
-{{-- AJAX Pagination --}}
 <script>
 let timer;
 
-// Search dengan debounce
+// Event pencarian (dengan debounce)
 $('#search-input').on('keyup', function () {
     clearTimeout(timer);
-    const query = $(this).val();
-    const tahun = '{{ request('tahun') }}';
-
     timer = setTimeout(() => {
-        let url = '{{ route("indah-kegiatan.index") }}?q=' + encodeURIComponent(query);
-        if (tahun) {
-            url += '&tahun=' + encodeURIComponent(tahun);
-        }
-        fetchKegiatan(url);
+        fetchFilteredData(1);
     }, 300);
 });
 
-// Pagination AJAX
-$(document).on('click', '.pagination a', function (e) {
-    e.preventDefault();
-    let url = $(this).attr('href');
-    const queryString = '{{ $queryString }}';
-    if (!url.includes('q=') && queryString) {
-        url += (url.includes('?') ? '&' : '?') + queryString;
-    }
-    fetchKegiatan(url);
+// Event filter tahun
+$('#tahun-select').on('change', function () {
+    fetchFilteredData(1);
 });
 
-// Fetch via AJAX
-function fetchKegiatan(url) {
+// Pagination link
+$(document).on('click', '.pagination a', function (e) {
+    e.preventDefault();
+    const page = $(this).attr('href').split('page=')[1];
+    fetchFilteredData(page);
+});
+
+function fetchFilteredData(page = 1) {
+    const q = $('#search-input').val();
+    const tahun = $('#tahun-select').val();
+
+    const url = `{{ route('indah-kegiatan.index') }}?page=${page}&q=${encodeURIComponent(q)}&tahun=${encodeURIComponent(tahun)}`;
+
     $.ajax({
         url: url,
         type: 'GET',

@@ -16,47 +16,47 @@ class IndahKegiatanController extends Controller
     // Menampilkan daftar kegiatan
    public function index(Request $request)
 {
-    // Tahun default = tahun lalu (pelaporan metadata tahun sebelumnya)
+    // Tahun default untuk pelaporan metadata tahun sebelumnya
     $defaultTahun = now()->year - 1;
 
-    // Ambil input tahun dari request, fallback ke default
+    // Ambil tahun dari request, fallback ke default
     $selectedTahun = $request->input('tahun', $defaultTahun);
 
+    // Query awal
     $query = IndahKegiatan::query();
 
-    // Filter pencarian teks
+    // Filter pencarian
     if ($request->filled('q')) {
         $search = $request->q;
         $query->where(function ($qBuilder) use ($search) {
-            $qBuilder->where('tahun', 'like', "%$search%")
-                     ->orWhere('produsen_data_name', 'like', "%$search%")
-                     ->orWhere('judul_kegiatan', 'like', "%$search%");
+            $qBuilder->where('judul_kegiatan', 'like', "%$search%")
+                     ->orWhere('produsen_data_name', 'like', "%$search%");
         });
     }
 
-    // Filter tahun (default: tahun lalu)
-    if ($selectedTahun) {
+    // Filter tahun
+    if (!empty($selectedTahun)) {
         $query->where('tahun', $selectedTahun);
     }
 
-    // Ambil data dengan pagination + simpan parameter pencarian
-    $kegiatan = $query->orderBy('created_at', 'desc')->paginate(10);
-    $kegiatan->appends($request->all());
+    // Ambil data dengan pagination
+    $kegiatan = $query->orderBy('created_at', 'desc')->paginate(10)->appends($request->all());
 
-    // Buat list tahun untuk dropdown (dari 2019 sampai sekarang)
-    $tahunList = range(now()->year, 2019);
+    // Daftar tahun dari 2025 ke 2022
+    $tahunList = range(now()->year, 2022);
 
-    // Jika permintaan AJAX (pagination/filter dinamis)
+    // Jika request AJAX (untuk pagination atau pencarian dinamis)
     if ($request->ajax()) {
         return response()->json([
             'rows' => view('indah_kegiatan.partials.table_rows', compact('kegiatan'))->render(),
-            'pagination' => $kegiatan->links('pagination::bootstrap-5')->toHtml(),
+            'pagination' => $kegiatan->withQueryString()->links('pagination::bootstrap-5')->toHtml(),
         ]);
     }
 
-    // Tampilkan view utama
+    // Jika request biasa (full render)
     return view('indah_kegiatan.index', compact('kegiatan', 'tahunList', 'selectedTahun'));
 }
+
 
 
 
