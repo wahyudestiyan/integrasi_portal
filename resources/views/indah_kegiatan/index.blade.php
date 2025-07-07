@@ -18,6 +18,7 @@
     }
 </style>
 
+{{-- Sinkronisasi Metadata --}}
 <div class="mb-4">
     <form method="GET" action="{{ route('indah-kegiatan.sync') }}">
         <div class="input-group mb-3" style="max-width: 300px;">
@@ -28,41 +29,38 @@
 </div>
 
 @if(session('success'))
-<div class="alert alert-success">
-    {{ session('success') }}
-</div>
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
 @endif
 
 <div class="container">
     <h1 class="mb-4">Daftar Metadata Kegiatan Statistik</h1>
 
+    {{-- Search & Filter --}}
     <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
+        <form method="GET" action="{{ route('indah-kegiatan.index') }}" class="d-flex flex-wrap gap-2 w-100">
+            {{-- Input Pencarian --}}
+            <div class="flex-grow-1" style="min-width: 200px;">
+                <input type="text" id="search-input" name="q" class="form-control"
+                       placeholder="Cari instansi atau judul..." value="{{ request('q') }}">
+            </div>
 
-    <form method="GET" action="{{ route('indah-kegiatan.index') }}" class="d-flex flex-wrap gap-2" style="width: 100%;">
-        <!-- Search Input -->
-        <div class="flex-grow-1" style="min-width: 200px;">
-            <input type="text" id="search-input" name="q" class="form-control"
-                   placeholder="Cari instansi, atau judul..." value="{{ request('q') }}">
-        </div>
+            {{-- Filter Tahun --}}
+            <div style="min-width: 200px;">
+                <select name="tahun" class="form-select" onchange="this.form.submit()">
+                    <option value="">Periode: Semua Tahun</option>
+                    @foreach (range(now()->year, 2022) as $th)
+                        <option value="{{ $th }}" {{ request('tahun', now()->year - 1) == $th ? 'selected' : '' }}>
+                            Tahun {{ $th }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </form>
+    </div>
 
-        <!-- Filter Tahun -->
-        <div style="min-width: 200px;">
-            <select name="tahun" class="form-select" onchange="this.form.submit()">
-                <option value="">Periode: Semua Tahun</option>
-                @foreach (range(now()->year, 2022) as $th)
-                    <option value="{{ $th }}" {{ request('tahun') == $th ? 'selected' : '' }}>
-                        Tahun {{ $th }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        <!-- Tombol opsional jika ingin tombol filter manual -->
-        {{-- <button type="submit" class="btn btn-primary">Filter</button> --}}
-    </form>
-
-</div>
-
+    {{-- Tabel Kegiatan --}}
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>
@@ -85,29 +83,42 @@
     </div>
 </div>
 
+{{-- Simpan query kecuali "page" --}}
+@php
+    $queryString = http_build_query(request()->except('page'));
+@endphp
+
+{{-- AJAX Pagination --}}
 <script>
 let timer;
 
+// Search dengan debounce
 $('#search-input').on('keyup', function () {
     clearTimeout(timer);
     const query = $(this).val();
     const tahun = '{{ request('tahun') }}';
 
     timer = setTimeout(() => {
-        let url = '{{ route("indah-kegiatan.index") }}?q=' + query;
+        let url = '{{ route("indah-kegiatan.index") }}?q=' + encodeURIComponent(query);
         if (tahun) {
-            url += '&tahun=' + tahun;
+            url += '&tahun=' + encodeURIComponent(tahun);
         }
         fetchKegiatan(url);
     }, 300);
 });
 
+// Pagination AJAX
 $(document).on('click', '.pagination a', function (e) {
     e.preventDefault();
     let url = $(this).attr('href');
+    const queryString = '{{ $queryString }}';
+    if (!url.includes('q=') && queryString) {
+        url += (url.includes('?') ? '&' : '?') + queryString;
+    }
     fetchKegiatan(url);
 });
 
+// Fetch via AJAX
 function fetchKegiatan(url) {
     $.ajax({
         url: url,

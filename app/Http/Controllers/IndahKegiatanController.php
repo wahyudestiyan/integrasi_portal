@@ -16,15 +16,15 @@ class IndahKegiatanController extends Controller
     // Menampilkan daftar kegiatan
    public function index(Request $request)
 {
-    // Default tahun = tahun lalu (pelaporan tahun sebelumnya)
+    // Tahun default = tahun lalu (pelaporan metadata tahun sebelumnya)
     $defaultTahun = now()->year - 1;
 
-    // Ambil tahun dari query, jika tidak ada gunakan default
+    // Ambil input tahun dari request, fallback ke default
     $selectedTahun = $request->input('tahun', $defaultTahun);
 
     $query = IndahKegiatan::query();
 
-    // Filter berdasarkan pencarian teks
+    // Filter pencarian teks
     if ($request->filled('q')) {
         $search = $request->q;
         $query->where(function ($qBuilder) use ($search) {
@@ -34,19 +34,19 @@ class IndahKegiatanController extends Controller
         });
     }
 
-    // Filter berdasarkan tahun (default: tahun lalu)
-    if (!empty($selectedTahun)) {
+    // Filter tahun (default: tahun lalu)
+    if ($selectedTahun) {
         $query->where('tahun', $selectedTahun);
     }
 
-    // Ambil data dengan pagination
+    // Ambil data dengan pagination + simpan parameter pencarian
     $kegiatan = $query->orderBy('created_at', 'desc')->paginate(10);
     $kegiatan->appends($request->all());
 
-    // Buat daftar tahun dari 2019 sampai tahun sekarang
-    $tahunList = range(2022, now()->year);
+    // Buat list tahun untuk dropdown (dari 2019 sampai sekarang)
+    $tahunList = range(now()->year, 2019);
 
-    // Jika AJAX, hanya render baris dan pagination
+    // Jika permintaan AJAX (pagination/filter dinamis)
     if ($request->ajax()) {
         return response()->json([
             'rows' => view('indah_kegiatan.partials.table_rows', compact('kegiatan'))->render(),
@@ -54,6 +54,7 @@ class IndahKegiatanController extends Controller
         ]);
     }
 
+    // Tampilkan view utama
     return view('indah_kegiatan.index', compact('kegiatan', 'tahunList', 'selectedTahun'));
 }
 
