@@ -134,6 +134,29 @@ td.d {
     cursor: pointer;
 }
 
+.id-badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: #0d6efd; /* Biru */
+    color: white;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 5px 0 0 5px;
+    font-size: 12px;
+    height: 30px;
+}
+
+.id-value {
+    background-color: #e9f2ff;
+    padding: 3px 10px;
+    border-radius: 0 5px 5px 0;
+    height: 30px;
+    line-height: 24px;
+    font-weight: bold;
+    color: #222;
+    font-size: 14px;
+}
+
 
 /* Responsif */
 @media (max-width: 768px) {
@@ -162,6 +185,15 @@ td.d {
         Download PDF
     </a>
 </p>
+
+<!-- ID Kegiatan -->
+<div class="mb-3">
+    <span class="id-badge">ID</span><span class="id-value">{{ $kegiatan->id_kegiatan_mms }}</span>
+    <span class="id-badge">Diajukan</span>
+    <span class="id-value">{{ \Carbon\Carbon::parse($kegiatan->created_at)->translatedFormat('d F Y') }}</span>
+</div>
+
+
 
     <table>
         <tr><td height="25px"></td></tr>

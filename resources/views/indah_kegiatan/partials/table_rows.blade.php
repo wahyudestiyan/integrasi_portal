@@ -6,6 +6,9 @@
     <td class="text-center">{{ ucwords(strtolower(str_replace('_', ' ', $item->jenis_statistik))) }}</td>
     <td class="text-start">{{ ucwords(strtolower(str_replace('_', ' ', $item->produsen_data_name))) }}</td>
     <td class="text-center">
+        {{ \Carbon\Carbon::parse($item->created_at)->translatedFormat('d F Y') }}
+    </td>
+    <td class="text-center">
         <span class="badge bg-{{ $item->status == 'APPROVED' ? 'success' : 'warning' }}">
             {{ $item->status == 'APPROVED' ? 'Disetujui' : 'Menunggu' }}
         </span>
@@ -26,6 +29,6 @@
 </tr>
 @empty
 <tr>
-    <td colspan="8" class="text-center">Belum ada data kegiatan.</td>
+    <td colspan="8" class="text-center text-muted">Tidak ada data kegiatan.</td>
 </tr>
 @endforelse

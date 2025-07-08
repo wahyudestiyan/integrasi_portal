@@ -35,7 +35,9 @@ class Msind extends Model
         'status',
         'submission_period',
         'link_msind',
-        'link_mskeg'
+        'link_mskeg',
+         'created_at',
+        'updated_at'
     ];
 
     protected $casts = [

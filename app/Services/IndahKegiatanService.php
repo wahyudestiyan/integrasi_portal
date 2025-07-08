@@ -139,6 +139,11 @@ class IndahKegiatanService
                             'status' => $item['status'] ?? null,
                             'submission_period' => $item['submission_period'] ?? null,
                             'link_mskeg' => $item['link_mskeg'] ?? null,
+
+                            'created_at' => $item['created_at'] ?? now(),
+                           'updated_at' => $item['updated_at'] ?? now(),
+
+
                         ]
                     );
 
@@ -200,6 +205,10 @@ Log::info("Msvar data dari API id={$idApi}", $data);
                         'submission_period' => $var['submission_period'] ?? null,
                         'link_msvar' => $var['link_msvar'] ?? null,
                         'link_mskeg' => $var['link_mskeg'] ?? null,
+
+                        'created_at' => $var['created_at'] ?? now(),
+                         'updated_at' => $var['updated_at'] ?? now(),
+
                     ]
                 );
             } catch (\Throwable $e) {
@@ -253,6 +262,9 @@ Log::info("Msind data dari API id={$idApi}", $data);
                         'submission_period' => $ind['submission_period'] ?? null,
                         'link_msind' => $ind['link_msind'] ?? null,
                         'link_mskeg' => $ind['link_mskeg'] ?? null,
+
+                        'created_at' => $ind['created_at'] ?? now(),
+                     'updated_at' => $ind['updated_at'] ?? now(),
                     ]
                 );
             } catch (\Throwable $e) {

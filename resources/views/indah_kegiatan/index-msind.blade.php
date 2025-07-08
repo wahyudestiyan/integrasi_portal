@@ -21,7 +21,7 @@
                 <th class="text-center">No.</th>
                 <th class="text-center">Nama Indikator</th>
                 <th class="text-center">Produsen Data</th>
-                <th class="text-center">Pelapor</th>
+                <th class="text-center">Tanggal Diajukan</th>
                 <th class="text-center">Status</th>
                 <th class="text-center">Aksi</th>
             </tr>
@@ -32,7 +32,9 @@
                 <td>{{ $index + 1 }}</td>
                 <td>{{ ucwords(strtolower(str_replace('_', ' ', $ind->nama ))) }}</td>
                 <td>{{ ucwords(strtolower(str_replace('_', ' ', $ind->produsen_data_name ))) }}</td>
-                <td>{{ ucwords(strtolower(str_replace('_', ' ', $ind->requested_by ))) }}</td>
+                 <td>
+                    {{ \Carbon\Carbon::parse($ind->created_at)->translatedFormat('d F Y') }}
+                </td>
                 <td>
                 <span class="badge bg-{{ $ind->status == 'APPROVED' ? 'success' : 'warning' }}">
                     {{ $ind->status == 'APPROVED' ? 'Disetujui' : 'Menunggu' }}

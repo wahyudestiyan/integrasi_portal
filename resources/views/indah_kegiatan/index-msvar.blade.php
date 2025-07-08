@@ -23,7 +23,7 @@
                 <th class="text-center">Nama Variabel</th>
                 <th class="text-center">Alias</th>
                 <th class="text-center">Produsen Data</th>
-                <th class="text-center">Pelapor</th>
+                 <th class="text-center">Tanggal Diajukan</th>
                 <th class="text-center">Status</th>
                 <th class="text-center">Aksi</th>
             </tr>
@@ -35,7 +35,9 @@
                 <td>{{ ucwords(strtolower(str_replace('_', ' ', $var->nama ))) }}</td>
                 <td>{{ ucwords(strtolower(str_replace('_', ' ', $var->alias ))) }}</td>
                 <td>{{ ucwords(strtolower(str_replace('_', ' ', $var->produsen_data_name ))) }}</td>
-                <td>{{ ucwords(strtolower(str_replace('_', ' ', $var->requested_by ))) }}</td>
+                 <td>
+                     {{ \Carbon\Carbon::parse($var->created_at)->translatedFormat('d F Y') }}
+                </td>
                 <td>
                 <span class="badge bg-{{ $var->status == 'APPROVED' ? 'success' : 'warning' }}">
                     {{ $var->status == 'APPROVED' ? 'Disetujui' : 'Menunggu' }}

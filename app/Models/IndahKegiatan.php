@@ -88,7 +88,9 @@ class IndahKegiatan extends Model
         'last_sync',
         'status',
         'submission_period',
-        'link_mskeg'
+        'link_mskeg',
+        'created_at',
+        'updated_at'
     ];
 
     protected $casts = [

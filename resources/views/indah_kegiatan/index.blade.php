@@ -64,16 +64,17 @@
     {{-- Tabel Kegiatan --}}
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
-            <tr>
-                <th class="text-center" style="width: 5%;">No.</th>
-                <th class="text-start" style="width: 35%;">Nama Kegiatan</th>
-                <th class="text-center" style="width: 7%;">Tahun</th>
-                <th class="text-center" style="width: 15%;">Jenis Statistik</th>
-                <th class="text-start" style="width: 23%;">Produsen Data</th>
-                <th class="text-center" style="width: 7%;">Status</th>
-                <th class="text-center" style="width: 7%;">Aksi</th>
-            </tr>
-        </thead>
+    <tr>
+        <th class="text-center" style="width: 5%;">No.</th>
+        <th class="text-start" style="width: 35%;">Nama Kegiatan</th>
+        <th class="text-center" style="width: 7%;">Tahun</th>
+        <th class="text-center" style="width: 10%;">Jenis Statistik</th>
+        <th class="text-start" style="width: 18%;">Produsen Data</th>
+        <th class="text-center" style="width: 13%;">Tanggal Diajukan</th>
+        <th class="text-center" style="width: 7%;">Status</th>
+        <th class="text-center" style="width: 7%;">Aksi</th>
+    </tr>
+</thead>
         <tbody id="table-container">
             @include('indah_kegiatan.partials.table_rows')
         </tbody>

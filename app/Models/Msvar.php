@@ -34,7 +34,9 @@ class Msvar extends Model
         'status',
         'submission_period',
         'link_msvar',
-        'link_mskeg'
+        'link_mskeg',
+         'created_at',
+        'updated_at'
     ];
 
     protected $casts = [
